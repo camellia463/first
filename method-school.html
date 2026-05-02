@@ -1,0 +1,2406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学习方法超市</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #fff5f7 0%, #ffeef2 50%, #fff0f5 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 樱花飘落动画 */
+        .sakura-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .sakura {
+            position: absolute;
+            color: #ffb7c5;
+            font-size: 20px;
+            opacity: 0.6;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-10vh) rotate(0deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(110vh) rotate(360deg);
+                opacity: 0.2;
+            }
+        }
+
+        /* 顶部导航 */
+        .header {
+            background: linear-gradient(135deg, #ff9aaf 0%, #ff6b8a 100%);
+            color: white;
+            padding: 20px 40px;
+            box-shadow: 0 2px 8px rgba(255, 107, 138, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* 分类标签栏 */
+        .category-bar {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 16px 40px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 8px rgba(255, 107, 138, 0.1);
+            position: sticky;
+            top: 88px;
+            z-index: 99;
+        }
+
+        .category-btn {
+            padding: 8px 20px;
+            border: 1px solid #d9e8ff;
+            border-radius: 20px;
+            background: white;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .category-btn:hover {
+            border-color: #ff6b8a;
+            color: #ff6b8a;
+            background: #fff5f7;
+        }
+
+        .category-btn.active {
+            background: linear-gradient(135deg, #ff9aaf 0%, #ff6b8a 100%);
+            color: white;
+            border-color: #ff6b8a;
+        }
+
+        .category-btn[data-category="memory"] { border-left: 3px solid #ff6b6b; }
+        .category-btn[data-category="output"] { border-left: 3px solid #51cf66; }
+        .category-btn[data-category="note"] { border-left: 3px solid #fcc419; }
+        .category-btn[data-category="goal"] { border-left: 3px solid #845ef7; }
+        .category-btn[data-category="cognition"] { border-left: 3px solid #22b8cf; }
+        .category-btn[data-category="focus"] { border-left: 3px solid #f06595; }
+        .category-btn[data-category="reading"] { border-left: 3px solid #20c997; }
+
+        /* 主内容区 */
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .method-count {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .method-count span {
+            color: #1890ff;
+            font-weight: 600;
+        }
+
+        /* 卡片网格 */
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        /* 方法卡片 */
+        .method-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(255, 107, 138, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 182, 193, 0.3);
+        }
+
+        .method-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(255, 107, 138, 0.25);
+            border-color: #91d5ff;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .card-icon.memory { background: linear-gradient(135deg, #fff0f0 0%, #ffdbdb 100%); }
+        .card-icon.output { background: linear-gradient(135deg, #f0fff0 0%, #dbf2d8 100%); }
+        .card-icon.note { background: linear-gradient(135deg, #fff8e0 0%, #fff0c0 100%); }
+        .card-icon.goal { background: linear-gradient(135deg, #f0f0ff 0%, #d8d8f5 100%); }
+        .card-icon.cognition { background: linear-gradient(135deg, #e0f7ff 0%, #c0f0ff 100%); }
+        .card-icon.focus { background: linear-gradient(135deg, #ffe0f0 0%, #ffd0e8 100%); }
+        .card-icon.reading { background: linear-gradient(135deg, #e0fff0 0%, #c0ffe8 100%); }
+
+        .card-tag {
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            background: #fff0f5;
+            color: #ff6b8a;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .card-en {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 12px;
+        }
+
+        .card-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-footer {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #f0f5ff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .card-tier {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .card-tier.tier-t1 {
+            background: #d9f7be;
+            color: #52c41a;
+        }
+
+        .card-tier.tier-t2 {
+            background: #ffe58f;
+            color: #fa8c16;
+        }
+
+        .card-tier.tier-t3 {
+            background: #ffccc7;
+            color: #ff4d4f;
+        }
+
+        .card-level {
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .level-high {
+            background: #fff2e8;
+            color: #fa541c;
+        }
+
+        .level-mid {
+            background: #fffbe6;
+            color: #faad14;
+        }
+
+        .level-low {
+            background: #f6ffed;
+            color: #52c41a;
+        }
+
+        /* 进度条 */
+        .card-progress {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 4px;
+            background: #f0f0f0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #ff9aaf 0%, #ff6b8a 100%);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 11px;
+            color: #999;
+            min-width: 32px;
+            text-align: right;
+        }
+
+        /* 已掌握状态 */
+        .card-mastered {
+            background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
+            border: 1px solid #b7eb8f;
+        }
+
+        .card-mastered .card-level {
+            background: #52c41a;
+            color: white;
+        }
+
+        .card-arrow {
+            color: #ccc;
+            font-size: 18px;
+            transition: transform 0.3s;
+        }
+
+        .method-card:hover .card-arrow {
+            transform: translateX(4px);
+            color: #ff6b8a;
+        }
+
+        .method-card.card-mastered {
+            border: 2px solid #52c41a;
+            background: linear-gradient(135deg, #f6ffed 0%, #e8f8e8 100%);
+        }
+
+        /* 详情弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            padding: 30px 30px 20px;
+            background: linear-gradient(135deg, #ff9aaf 0%, #ff6b8a 100%);
+            color: white;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .modal-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .modal-en {
+            font-size: 14px;
+            opacity: 0.85;
+        }
+
+        .modal-tag {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 4px 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-section {
+            margin-bottom: 24px;
+        }
+
+        .modal-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-section-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: #ff6b8a;
+            border-radius: 2px;
+        }
+
+        .modal-section p {
+            font-size: 15px;
+            color: #444;
+            line-height: 1.8;
+        }
+
+        .modal-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .modal-section li {
+            font-size: 14px;
+            color: #444;
+            line-height: 1.8;
+            padding: 8px 0;
+            border-bottom: 1px solid #f5f5f5;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .modal-section li::before {
+            content: '•';
+            color: #1890ff;
+            font-weight: bold;
+        }
+
+        .modal-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .modal-step {
+            display: flex;
+            gap: 12px;
+            padding: 12px 16px;
+            background: #f8fbff;
+            border-radius: 10px;
+            align-items: flex-start;
+        }
+
+        .step-num {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #ff9aaf 0%, #ff6b8a 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        /* 步骤勾选 */
+        .step-checkbox {
+            width: 22px;
+            height: 22px;
+            border: 2px solid #d9d9d9;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            font-size: 14px;
+            color: white;
+        }
+
+        .step-checkbox:hover {
+            border-color: #ff6b8a;
+        }
+
+        .step-checkbox.checked {
+            background: linear-gradient(135deg, #ff9aaf 0%, #ff6b8a 100%);
+            border-color: #ff6b8a;
+        }
+
+        .modal-step.checked {
+            background: #fff5f7;
+        }
+
+        .modal-step.checked .step-content {
+            color: #999;
+            text-decoration: line-through;
+        }
+
+        /* 掌握状态 */
+        .mastered-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .progress-header h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .progress-header h4::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: #ff6b8a;
+            border-radius: 2px;
+        }
+
+        .progress-info {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .progress-info span {
+            color: #52c41a;
+            font-weight: 600;
+        }
+
+        .long-desc p {
+            font-size: 14px;
+            color: #444;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .long-desc p:last-child {
+            margin-bottom: 0;
+        }
+
+        .why-category {
+            display: flex;
+            gap: 12px;
+            background: linear-gradient(135deg, #fff7e6 0%, #fff2d6 100%);
+            border-radius: 10px;
+            padding: 14px 16px;
+            border-left: 4px solid #fa8c16;
+        }
+
+        .why-category-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .why-category-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #fa8c16;
+            margin-bottom: 4px;
+        }
+
+        .why-category-text p {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .tier-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f5ff;
+        }
+
+        .tier-badge {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .tier-t1 {
+            background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+            color: white;
+        }
+
+        .tier-t2 {
+            background: linear-gradient(135deg, #fa8c16 0%, #ffc53d 100%);
+            color: white;
+        }
+
+        .tier-t3 {
+            background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+            color: white;
+        }
+
+        .tier-desc {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .modal-tip {
+            background: linear-gradient(135deg, #f0f5ff 0%, #e8f4ff 100%);
+            border-radius: 10px;
+            padding: 16px;
+            border-left: 4px solid #ff6b8a;
+        }
+
+        .modal-tip-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #ff6b8a;
+            margin-bottom: 6px;
+        }
+
+        .modal-tip p {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        /* 可视化区域 */
+        .visual-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #fff7e6 0%, #fff3d9 100%);
+            border-radius: 16px;
+            border: 1px solid #ffd591;
+        }
+
+        .visual-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fa8c16;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* 流程图样式 */
+        .flowchart {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px 0;
+        }
+
+        .flow-node {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .flow-num {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .flow-text {
+            font-size: 14px;
+            color: #333;
+            padding: 8px 14px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e8f4ff;
+            flex: 1;
+        }
+
+        .flow-arrow {
+            text-align: center;
+            color: #ccc;
+            font-size: 16px;
+            padding: 4px 0;
+        }
+
+        /* 树状图样式 */
+        .tree-diagram {
+            padding: 10px 0;
+        }
+
+        .tree-root {
+            text-align: center;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+            color: white;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: inline-block;
+        }
+
+        .tree-branches {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tree-branch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tree-connector {
+            width: 2px;
+            height: 16px;
+            background: #ccc;
+        }
+
+        .tree-leaf {
+            padding: 8px 14px;
+            background: white;
+            border: 2px solid #1890ff;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #333;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        /* 网状图样式 */
+        .network-diagram {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .network-center {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+        }
+
+        .network-nodes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .network-node {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            background: white;
+            border: 2px solid #22b8cf;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        /* 对比图样式 */
+        .compare-diagram {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 16px;
+            align-items: center;
+            padding: 10px 0;
+        }
+
+        .compare-box {
+            padding: 14px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .compare-box.good {
+            background: linear-gradient(135deg, #f6ffed 0%, #e8f8e8 100%);
+            border: 2px solid #52c41a;
+        }
+
+        .compare-box.bad {
+            background: linear-gradient(135deg, #fff2e8 0%, #ffe7d6 100%);
+            border: 2px solid #ff4d4f;
+        }
+
+        .compare-label {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .compare-box.good .compare-label { color: #52c41a; }
+        .compare-box.bad .compare-label { color: #ff4d4f; }
+
+        .compare-text {
+            font-size: 13px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .compare-arrow {
+            font-size: 24px;
+            color: #999;
+        }
+
+        /* 平衡图样式 */
+        .balance-diagram {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .balance-scale {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .balance-top {
+            display: flex;
+            gap: 40px;
+            align-items: flex-end;
+        }
+
+        .balance-pan {
+            width: 70px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .balance-pan.low {
+            background: #fff2e8;
+            border: 2px solid #ffa940;
+        }
+
+        .balance-pan.right {
+            background: #f6ffed;
+            border: 2px solid #52c41a;
+        }
+
+        .balance-pan.high {
+            background: #fff1f0;
+            border: 2px solid #ff4d4f;
+        }
+
+        .balance-stand {
+            width: 4px;
+            height: 30px;
+            background: #ccc;
+        }
+
+        .balance-base {
+            width: 80px;
+            height: 8px;
+            background: #ccc;
+            border-radius: 4px;
+        }
+
+        /* 图像示例样式 */
+        .image-example {
+            background: white;
+            border: 1px solid #e8f4ff;
+            border-radius: 10px;
+            padding: 14px;
+            margin-top: 12px;
+        }
+
+        .image-example-title {
+            font-size: 12px;
+            color: #1890ff;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .image-example-content {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .mind-path {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px;
+            background: #f8fbff;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .mind-path .node {
+            padding: 6px 12px;
+            background: white;
+            border: 1px solid #1890ff;
+            border-radius: 6px;
+            color: #333;
+        }
+
+        .mind-path .arrow {
+            color: #1890ff;
+            font-weight: bold;
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #f0f5ff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-level {
+            font-size: 13px;
+            color: #666;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .header {
+                padding: 16px 20px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .category-bar {
+                padding: 12px 20px;
+                top: 74px;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .method-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 分类标题 */
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title span {
+            color: #1890ff;
+        }
+    </style>
+</head>
+<body>
+    <!-- 樱花飘落 -->
+    <div class="sakura-container" id="sakura-container"></div>
+    <header class="header">
+        <h1>🌸 学习方法超市</h1>
+        <p>找到适合你的学习方法，让学习效率翻倍</p>
+    </header>
+
+    <nav class="category-bar">
+        <button class="category-btn active" data-category="all">全部</button>
+        <button class="category-btn" data-category="memory">记忆类</button>
+        <button class="category-btn" data-category="output">输出类</button>
+        <button class="category-btn" data-category="note">笔记类</button>
+        <button class="category-btn" data-category="goal">目标类</button>
+        <button class="category-btn" data-category="cognition">认知类</button>
+        <button class="category-btn" data-category="focus">专注类</button>
+        <button class="category-btn" data-category="reading">阅读类</button>
+    </nav>
+
+    <main class="main-content">
+        <p class="method-count">共收录 <span id="total-count">0</span> 种学习方法</p>
+        <div class="method-grid" id="method-grid"></div>
+    </main>
+
+    <!-- 详情弹窗 -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-header-top">
+                    <div>
+                        <h2 class="modal-title" id="modal-title"></h2>
+                        <p class="modal-en" id="modal-en"></p>
+                        <span class="modal-tag" id="modal-tag"></span>
+                    </div>
+                    <button class="modal-close" onclick="closeModal()">✕</button>
+                </div>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+            <div class="modal-footer">
+                <span class="modal-level" id="modal-level"></span>
+                <span style="font-size: 13px; color: #999;">点击任意处关闭</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 学习方法数据库
+        // 学习方法数据库
+        // tier: T1入门/T2进阶/T3高阶
+        // categoryExplain: 解释为什么在这个分类
+        const methods = [
+            {
+                id: 1,
+                name: '间隔重复',
+                en: 'Spaced Repetition',
+                category: 'memory',
+                icon: '⏰',
+                tag: '记忆类',
+                tier: 'T1',
+                tierText: '入门',
+                level: '长期收益',
+                levelClass: 'level-low',
+                shortDesc: '在遗忘临界点复习，把短时记忆变成长期记忆',
+                desc: '间隔重复是一种利用人类遗忘曲线的学习策略。不是一次性死记硬背，而是在即将遗忘的时候复习，让记忆保持新鲜。这是最被科学验证有效的记忆方法之一。',
+                longDesc: '德国心理学家艾宾浩斯在1885年发现，人类遗忘的速度不是线性的，而是"先快后慢"。刚学完的内容，20分钟后可能只记得60%，一个月后可能只剩20%。但如果你在即将遗忘的时间点复习，就能大幅提升记忆保持率。\n\n间隔重复的核心不是"多复习"，而是"在正确的时间复习"。Anki、SuperMemo等软件就是基于这个原理设计的，它们会自动计算每个知识点的最佳复习时间。',
+                whyCategory: '记忆类方法的核心是"对抗遗忘"，间隔重复直接作用于记忆的存储和提取过程，是记忆类方法的基石。学会这招，其他记忆方法效果都会翻倍。',
+                steps: [
+                    '学习新内容后，在5分钟后复习第一次',
+                    '30分钟后复习第二次',
+                    '12小时后再复习',
+                    '1天后复习第四次',
+                    '3天、7天、30天……逐渐拉长间隔'
+                ],
+                tips: '推荐工具：Anki（免费开源）、SuperMemo。关键是不要等到完全忘记了再复习，要抢在遗忘之前。AI可以帮你自动追踪复习时间。',
+                imageExample: '背英语单词"photosynthesis（光合作用）"，第一次看完后，5分钟后再看一遍，30分钟后再看一遍，睡前再看一遍，第二天再复习一次。这样间隔着复习，比一次性抄写20遍记得牢得多，而且花的时间反而更少。'
+            },
+            {
+                id: 2,
+                name: '主动回忆',
+                en: 'Active Recall',
+                category: 'memory',
+                icon: '💪',
+                tag: '记忆类',
+                tier: 'T1',
+                tierText: '入门',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '合上资料，凭记忆说出来或写出来',
+                desc: '主动回忆是检验真正学会没有的标准。看十遍不如闭眼回忆一遍，回忆的过程本身就是记忆深化的过程。',
+                longDesc: '很多人以为"看"就等于"学了"，但认知科学证明这是最大的误区。被动阅读时大脑处于舒适区，不需要努力提取信息，记忆痕迹很浅。\n\n主动回忆则强迫大脑"搜索"信息，这个搜索过程本身就是在强化神经连接。研究表明，主动回忆的回忆练习比被动重读的记忆效果好50%以上。\n\n"考试就是最好的学习"这句话背后的原理就是主动回忆。',
+                whyCategory: '主动回忆是"记忆提取"的过程，直接决定你能否真正记住并调用知识。每个记忆类方法最终都要落到"能否主动回忆出来"这个检验标准上。',
+                steps: [
+                    '学习完一段内容后，闭上眼睛',
+                    '在脑中或纸上回忆核心要点',
+                    '努力回想细节，不要翻书',
+                    '打开资料对照，看看哪里遗漏',
+                    '针对遗漏点重点加强'
+                ],
+                tips: '考试本身就是一种主动回忆练习，所以"测试效应"说考试也是学习。AI可以扮演考官，随时随地考你。',
+                imageExample: '学完"勾股定理"后，合上课本，在纸上画一个直角三角形，标上边长，自己推导出a²+b²=c²。如果卡住了翻书看哪里想不起来——那个卡住的地方就是没真正理解的点。'
+            },
+            {
+                id: 3,
+                name: '费曼学习法',
+                en: 'Feynman Technique',
+                category: 'output',
+                icon: '🎓',
+                tag: '输出类',
+                tier: 'T1',
+                tierText: '入门',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '用最简单的话解释一个概念，外行都能听懂才算真的会了',
+                desc: '诺贝尔物理学家理查德·费曼提出的学习方法。核心是"输出倒逼输入"——如果你不能简单地解释它，说明你还没有真正理解它。',
+                longDesc: '费曼被认为是继爱因斯坦之后最聪明的理论物理学家之一。他能在15分钟内把复杂的物理概念用普通人听得懂的话解释清楚，靠的不是天赋，而是这套方法。\n\n费曼学习法的精髓在于：知识在你脑海中可能是模糊的，但当你试图向一个完全不懂的人解释时，所有的模糊点都会暴露出来。那些你以为自己"懂了"但说不出所以然的地方，就是你真正需要加强的地方。\n\n这套方法特别适合学习新概念、准备考试、或者检验自己对某件事是否真正理解。',
+                whyCategory: '输出类方法的核心是"用输出检验和强化输入"。费曼学习法是最经典的输出检验方式——用最简单的话解释复杂概念，是"深度输出"的代表。',
+                steps: [
+                    '选择一个你想理解的概念',
+                    '假想你要把这个概念教给一个完全不懂的人',
+                    '遇到卡壳的地方，回头重新学习',
+                    '用最简单的语言重新组织解释',
+                    '检查是否有术语或复杂句子，简化到极致'
+                ],
+                tips: 'AI可以扮演"完全不懂的学生"，实时追问你细节。遇到追问答不上来的地方，就是你还没真正理解的地方。',
+                imageExample: '学完"相对论"后，试着向一个没学过物理的朋友解释："为什么坐飞船飞得越快，时间过得越慢？"如果你能讲到他点头说"原来如此"，说明你真懂了。如果你自己都讲得绕来绕去，说明还有模糊的地方需要回头再学。'
+            },
+            {
+                id: 4,
+                name: '交叉练习',
+                en: 'Interleaving',
+                category: 'cognition',
+                icon: '🔀',
+                tag: '认知类',
+                tier: 'T2',
+                tierText: '进阶',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '不同类型题目混合练习，不是集中刷同类题',
+                desc: '交叉练习是一种"反直觉"的学习方法。研究表明，把不同类型的题目混在一起做，虽然感觉更费劲，但学习效果远超集中练习。',
+                longDesc: '直觉告诉我们"专攻弱项"或"集中突破"最有效，但认知科学的研究结论恰恰相反。\n\n美国心理学家罗伯特 Bjork 的研究表明，交叉练习虽然"感觉更难"，但记忆效果更好。原因在于：每次切换题型，大脑都需要重新判断"这是什么类型的问题，该用什么方法"，这个判断过程本身就是强化学习的过程。\n\n更重要的是，交叉练习能帮你识别不同类型问题之间的联系，这是集中刷题永远做不到的。',
+                whyCategory: '交叉练习属于"认知策略"而非单纯的记忆技巧。它锻炼的是大脑区分问题类型、选择解题策略的能力，是认知灵活性训练的核心方法。',
+                steps: [
+                    '不要连续做10道同类型题目',
+                    '把不同类型的题目打散，交替练习',
+                    '例如：3道计算、2道概念、3道应用、2道计算',
+                    '练习时需要快速判断题目类型',
+                    '每道题都要自己想解法，不要套模板'
+                ],
+                visual: {
+                    type: 'flowchart',
+                    nodes: ['识别题型A', '切换到题型B', '再切题型C', '大脑快速判断用什么方法', '建立题型之间的联系']
+                },
+                imageExample: '学数学时，不要按章节刷题（全是计算题、全是证明题……），而是混合做：3道计算、2道证明、1道应用题、2道概念题。每次切换都需要大脑重新"加载"解题策略，这种频繁切换就是在训练你的解题灵活性。考试时遇到混合题型的卷子，你会发现自己的反应特别快。',
+                tips: '交叉练习的"难度"来自于需要不断切换思维模式，这种"必要难度"反而让记忆更深刻。刚开始会感觉更费劲，坚持下去效果会让你惊讶。'
+            },
+            {
+                id: 5,
+                name: 'Cornell笔记法',
+                en: 'Cornell Notes',
+                category: 'note',
+                icon: '📝',
+                tag: '笔记类',
+                tier: 'T1',
+                tierText: '入门',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '三区笔记法：笔记栏、提示栏、总结栏',
+                desc: '康奈尔大学Walter Pauk发明的笔记系统。把笔记本分成三部分，右边记原始笔记，左边写关键词/问题，底部写总结。',
+                longDesc: 'Walter Pauk是康奈尔大学图书馆研究员，他在上世纪50年代设计了这套笔记系统，至今仍被全球无数学生使用。\n\nCornell笔记法的设计理念是"让笔记活起来"。传统笔记记完就丢，但Cornell笔记法强制你在课后做三件事：提炼关键词、生成问题、写出总结。这三个动作把被动抄写变成了主动加工。\n\n更重要的是左栏的"问题栏"——它把笔记变成了一个检索系统。复习时先看问题栏，自己回忆答案，再看右栏核对。这个过程自然引导你进行主动回忆。',
+                whyCategory: '笔记类方法的核心是"把信息转化为自己能用的知识结构"。Cornell笔记法通过强制的信息加工，把原始笔记升级为可检索、可回忆的结构化知识。',
+                steps: [
+                    '把一页笔记分成三部分：右侧大栏（2/3）、左侧提示栏（1/3）、底部总结栏',
+                    '右侧大栏：上课或读书时快速记录完整内容',
+                    '左侧提示栏：课后或读完后，写上关键词、问题提示',
+                    '底部总结栏：用自己话写出这页笔记的核心观点',
+                    '复习时先看左侧提示栏，自己回忆内容，再看右侧核对'
+                ],
+                tips: 'AI可以帮你自动生成"提示栏"的问题和底部的总结，大幅减少整理笔记的时间。你只需要专注于记录和回忆。',
+                imageExample: '上完一节物理课后，在笔记本右侧记满课堂笔记。然后在左侧写上"牛顿第三定律是什么？"、"什么时候用F=ma而不是F=mg？"这样的问题。底部用一句话总结："作用力和反作用力大小相等、方向相反、作用于不同物体。"复习时先遮住右栏，自己回答左栏的问题。'
+            },
+            {
+                id: 6,
+                name: 'SQ3R阅读法',
+                en: 'SQ3R Method',
+                category: 'reading',
+                icon: '📖',
+                tag: '阅读类',
+                tier: 'T1',
+                tierText: '入门',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '浏览、提问、阅读、复述、复习五步阅读法',
+                desc: 'Survey（浏览）、Question（提问）、Read（阅读）、Recite（复述）、Review（复习）。美国心理学教授Francis Robinson创建的阅读策略。',
+                longDesc: 'Francis Robinson是美国俄亥俄州立大学的心理学教授，1946年他在《Effective Study》一书中提出了SQ3R方法。这是最早被系统研究的阅读策略之一，至今仍被广泛推荐。\n\nSQ3R的核心是"主动阅读"。传统阅读是被动接收信息，SQ3R则要求你在阅读前和阅读中不断提问，让大脑处于主动搜索答案的状态。\n\nSurvey步骤让你在读之前就知道文章的大致框架；Question步骤激活你的好奇心和期待；Read步骤带着问题读，更有针对性；Recite步骤强制你消化吸收；Review步骤巩固记忆。',
+                whyCategory: '阅读类方法的核心是"提升阅读质量和效率"。SQ3R是阅读类方法的经典入门款，适合教材、论文、书籍等需要深度理解的文本。',
+                steps: [
+                    'Survey（浏览）：快速翻阅目录、标题、图片，了解大概',
+                    'Question（提问）：写下你想通过阅读解答的问题',
+                    'Read（阅读）：带着问题仔细阅读，不要划线',
+                    'Recite（复述）：读完一段后，合上书用自己的话复述',
+                    'Review（复习）：全部读完后，回顾主要观点，回答之前的问题'
+                ],
+                tips: '第三步"Read"阶段不要急着划重点，先完整读一遍再说。划线是最后复习阶段的事，过早划重点会让人产生"已经记住了"的错觉。',
+                imageExample: '读一篇"光合作用"文章：先快速翻看目录小标题（Survey），写下"植物怎么把光变成能量"这个问题（Question），然后带着问题读完全文（Read），合上书对自己说一遍光合作用的原理（Recite），最后回顾全文确认问题都回答了（Review）。'
+            },
+            {
+                id: 7,
+                name: '思维导图',
+                en: 'Mind Mapping',
+                category: 'note',
+                icon: '🗺️',
+                tag: '笔记类',
+                tier: 'T1',
+                tierText: '入门',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '用树状图可视化知识结构，建立概念联系',
+                desc: '英国心理学家托尼·博赞发明的思维工具。以一个核心概念为中心，向四周发散相关子主题，用颜色和图形增强记忆。',
+                longDesc: '托尼·博赞是英国著名心理学家和教育学家，被誉为"大脑先生"。他在研究大脑如何处理信息时发现，人类大脑擅长"联想"而非"线性思考"，于是创造了思维导图。\n\n思维导图的优势在于：它模拟了大脑的自然思维方式。传统线性笔记强迫大脑按固定顺序记录，而思维导图允许你从任意一个点发散，天然符合大脑的联想特性。\n\n更重要的是，画思维导图的过程本身就是一次"知识重组"。你需要思考哪些是核心概念、哪些是从属关系、哪些可以归为一类——这个思考过程就是深度的信息加工。',
+                whyCategory: '笔记类方法的核心是把外部信息转化为内在知识结构。思维导图以视觉化方式呈现概念间的层级和关联，比线性笔记更接近大脑的自然思维模式。',
+                steps: [
+                    '在纸中央写下核心主题，用一个圈或图像表示',
+                    '从这个中心向外画几条主要分支',
+                    '每条分支写上一个主要子主题',
+                    '从每个子主题继续向外发散，写出细节',
+                    '用不同颜色、图标标注不同类别'
+                ],
+                tips: '手绘思维导图效果比软件做的好，因为手绘过程本身就在强化记忆。AI可以帮你扩展导图内容，或者把一篇文章自动转化为思维导图。',
+                imageExample: '学习"三角形"这个概念，中心写"三角形"，三个主分支写"角"（三个内角和=180°）、"边"（三边关系）、"面积"（底×高÷2）。"角"下面再分支到"锐角/直角/钝角"——这样一个图把所有三角形知识点串起来了，复习时看一张图就够了。'
+            },
+            {
+                id: 8,
+                name: '番茄工作法',
+                en: 'Pomodoro Technique',
+                category: 'focus',
+                icon: '🍅',
+                tag: '专注类',
+                tier: 'T1',
+                tierText: '入门',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '25分钟专注工作 + 5分钟休息，循环往复',
+                desc: '意大利人Francesco Cirillo发明的专注方法。因为Cirillo最早用的是厨房里的番茄形状计时器，所以叫"番茄工作法"。',
+                longDesc: 'Francesco Cirillo在上世纪80年代读大学时，经常拖延学习进度，于是用厨房里的番茄形状计时器做实验。他发现把工作时间切成小块，比连续学习效率高得多。\n\n番茄工作法的核心价值不是"时间管理"，而是"对抗分心"。25分钟的时长经过精心设计：太短会打断思路，太长容易分心。25分钟刚好够进入深度状态，又不会让人望而生畏。\n\n休息的5分钟也很关键——它让大脑有时间"离线"处理信息，这就是为什么有时候休息时反而会冒出好点子。',
+                whyCategory: '专注类方法的核心是"创造能持续专注的条件"。番茄工作法通过结构化的时间切分和强制休息，帮大脑保持最佳专注状态。入门简单，是培养专注习惯的好起点。',
+                steps: [
+                    '选择一个待完成的任务',
+                    '把计时器设定为25分钟',
+                    '专注工作，中途不要做任何无关的事',
+                    '计时器响后，休息5分钟',
+                    '每完成4个番茄钟，休息15-30分钟'
+                ],
+                tips: '25分钟不是铁律，可以根据自己状态调整为45分钟或60分钟，关键是保证休息时真的在休息。不要把休息时间用来刷手机，那不是真正的休息。',
+                imageExample: '写一篇作文：设定25分钟倒计时，这期间手机静音、关闭网页，专心写。计时器响了，站起来伸展身体5分钟，喝水、远眺。休息完再设定25分钟，继续写下一个段落。4个番茄钟后，一篇完整的作文就写完了，中间有合理的休息不会那么累。'
+            },
+            {
+                id: 9,
+                name: '深度工作',
+                en: 'Deep Work',
+                category: 'focus',
+                icon: '🧠',
+                tag: '专注类',
+                tier: 'T2',
+                tierText: '进阶',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '在无干扰状态下进行高认知度工作',
+                desc: '卡尔·纽波特在《深度工作》一书中提出的概念。指在无干扰状态下集中注意力进行认知要求高的任务，是知识工作的核心技能。',
+                longDesc: '卡尔·纽波特是乔治城大学计算机科学副教授，他在2016年出版了《深度工作》一书后，这个概念迅速在知识工作者中流行开来。\n\n"深度工作"与"浮浅工作"的区别在于：深度工作需要你运用现有技能、创造新价值，难以复制；浮浅工作则是不需要太多认知投入的重复性任务。\n\n纽波特认为，深度工作是一种"正在消失的能力"——因为社交媒体和碎片化通信的盛行，越来越少人能长时间无干扰地专注。但正因为如此，能掌握这门技能的人会获得巨大的竞争优势。',
+                whyCategory: '专注类方法的进阶目标是进入"深度工作"状态。番茄工作法是入门工具，深度工作则是番茄工作法的升级版——需要更强的自控力和更长的专注时间。',
+                steps: [
+                    '选择一个深度任务（如写代码、写文章、学习复杂内容）',
+                    '关闭所有通知，退出社交媒体',
+                    '设定一个明确的开始和结束时间',
+                    '在无干扰环境下工作90-120分钟',
+                    '记录一天中深度工作的时间总量'
+                ],
+                tips: '每天保证2-4小时的深度工作，其效率远超8小时的碎片化工作。建议从每天1小时开始，逐渐增加，不要一开始就追求4小时。',
+                imageExample: '写代码时，关掉微信、Slack、邮箱提示，在桌上放一张纸写下"这个小时内只写XX功能的代码"。90分钟后你可能会惊讶于自己完成了多少——这就是没有干扰的深度工作状态下的效率。'
+            },
+            {
+                id: 10,
+                name: 'SMART目标法',
+                en: 'SMART Goals',
+                category: 'goal',
+                icon: '🎯',
+                tag: '目标类',
+                tier: 'T1',
+                tierText: '入门',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '5个标准让目标具体、可衡量、可达成',
+                desc: 'SMART分别代表Specific（具体）、Measurable（可衡量）、Achievable（可达成）、Relevant（相关）、Time-bound（有时限）。',
+                longDesc: 'SMART目标法最早由管理学家彼得·德鲁克在1954年提出，后来经过多位管理学者的完善，成为目标设定领域最经典的框架。\n\n这个框架的价值在于：它把模糊的愿望（如"我想学好英语"）转化为可执行的计划（如"每天用Duolingo学习30分钟，3个月后能进行日常对话"）。\n\n研究表明，有明确目标的人比没有目标的人成功率高出3-5倍。关键在于SMART原则中的"可衡量"——当目标可以被量化时，你才能知道自己是否在进步。',
+                whyCategory: '目标类方法的核心是"把模糊的愿望变成清晰可执行的计划"。SMART是目标设定的入门框架，适合任何需要设定学习目标的人。',
+                steps: [
+                    'S具体：我要学会Python，不是"学编程"',
+                    'M可衡量：能独立写一个爬虫，不是"会一点"',
+                    'A可达成：每天1小时，持续3个月，不是"一个月速成"',
+                    'R相关：Python对数据分析有用，不是"大家都学我也学"',
+                    'T有时限：3个月内完成，不是"有空再说"'
+                ],
+                tips: 'AI可以帮你把大目标拆解成每周、每天的小目标，形成可执行的计划。建议先从小目标开始，建立信心后再挑战更大的目标。',
+                imageExample: '"我想学好英语"不是目标，"我要在3个月内通过CET-4考试"也不是目标。正确的SMART目标："每天早上用扇贝单词App背20个单词，晚上看1集Netflix英语字幕剧，3个月后能听懂《老友记》80%的对话内容，每周复盘一次学习进度。"'
+            },
+            {
+                id: 11,
+                name: '刻意练习',
+                en: 'Deliberate Practice',
+                category: 'cognition',
+                icon: '🎯',
+                tag: '认知类',
+                tier: 'T2',
+                tierText: '进阶',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '在舒适区边缘反复练习，针对弱点突破',
+                desc: '心理学家安德斯·艾利克森提出的概念。指出专家级水平是后天练出来的，关键是在"学习区"（比当前能力略高）反复练习。',
+                longDesc: '安德斯·艾利克森是佛罗里达州立大学心理学教授，他通过对音乐家、棋手、运动员等各类专家的研究，提出了"刻意练习"理论。\n\n他的核心发现是：单纯的重复练习无法让你成为专家。你必须在"学习区"练习——即比你当前水平略高的任务，既有挑战性又不会让你完全无法应对。\n\n刻意练习的四个要素：1）明确目标，2）高度专注，3）即时反馈，4）不断改进。普通的"刷题"如果只是机械重复，不符合这四个要素，就不是真正的刻意练习。',
+                whyCategory: '认知类方法研究的是"如何高效提升认知能力"。刻意练习是认知科学中最重要的理论之一，它揭示了从"会"到"精通"的关键路径。',
+                steps: [
+                    '明确你想提升的具体技能',
+                    '找到这个领域的优秀者作为参照',
+                    '识别自己的"弱点"和"差距"',
+                    '设计针对弱点的练习方法',
+                    '练习后获取反馈，修正，继续练习'
+                ],
+                visual: {
+                    type: 'flowchart',
+                    nodes: ['明确目标技能', '找到专家参照', '识别弱点差距', '设计针对性练习', '获取反馈修正', '循环改进']
+                },
+                imageExample: '学打篮球投篮，不要一直用习惯的方式投（那只是机械重复）。刻意练习是：先看 NBA 球员的投篮姿势视频，分解动作（参照），发现自己出手点太低、手腕力量不够（识别弱点），然后每天专门练手腕爆发力和抬高出手点（针对弱点），每次投完记录命中率曲线，有进步就调整姿势（反馈修正）。',
+                tips: '"一万小时定律"的关键不是时间，而是刻意。机械重复一万小时不会成为专家，有目的的练习才会。找到好老师或教练能加速这个过程，因为他们能提供即时反馈。'
+            },
+            {
+                id: 12,
+                name: '检索练习',
+                en: 'Retrieval Practice',
+                category: 'memory',
+                icon: '🔍',
+                tag: '记忆类',
+                tier: 'T1',
+                tierText: '入门',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '通过回忆来强化记忆，不是反复阅读',
+                desc: '"检索"就是从大脑中提取信息的过程。研究表明，检索本身就能强化记忆，比反复阅读有效得多。',
+                longDesc: '认知心理学家Roediger和Butler在长达二十年的研究中证明，"检索练习"是强化记忆最有效的方法之一。\n\n这个方法的原理是：当你努力回忆某个信息时，大脑会强化与这个信息相关的神经连接。这个"努力回忆"的过程本身就是学习，即使最后想不起来。\n\n实验表明，主动检索（闭卷测试）比被动重读（再次看书）能提升50%以上的记忆效果。而且检索练习还有一个好处——你能立刻知道自己哪里不会。',
+                whyCategory: '记忆类方法需要回答"如何记住"的问题。检索练习直接作用于记忆的提取过程，是把短时记忆转化为长时记忆的关键步骤。',
+                steps: [
+                    '学习完材料后，尝试不看资料回忆要点',
+                    '做练习题或给自己出题',
+                    '用抽认卡检测记忆',
+                    '答错的题目重点复习',
+                    '隔段时间再次检索，检验记忆是否牢固'
+                ],
+                tips: 'AI非常适合做检索练习的伙伴——AI出题、AI判断答案、自动记录薄弱点。你可以让AI扮演考官，随时随地考你。',
+                imageExample: '学完历史第三章后，遮住书本，在纸上凭记忆写下"辛亥革命的经过"——导火线是什么、有什么重要事件、结果怎样。想不起来的再翻书，然后重新默写一遍。这个"先回忆再对照"的过程，比直接看三遍书记得更牢。'
+            },
+            {
+                id: 13,
+                name: '生成效应',
+                en: 'Generation Effect',
+                category: 'cognition',
+                icon: '💡',
+                tag: '认知类',
+                tier: 'T1',
+                tierText: '入门',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '自己思考出来的答案比看答案记得更牢',
+                desc: '心理学研究表明，自己生成的信息比被动接收的信息记忆更深刻。比如自己编的顺口溜比背别人的更不容易忘。',
+                longDesc: '"生成效应"是心理学中一个经典发现。1980年代的实验显示，当被试者自己创作谜语答案时，记忆效果远超阅读现成答案。\n\n为什么会这样？因为"生成"需要大脑更深度地加工信息。你需要调用已有知识、尝试不同组合、最终构建出一个答案——这个过程本身就是最佳的学习状态。\n\n顺口溜、联想法、归纳总结……这些都是生成效应的应用。关键是你自己"想出来"的，而不是别人"给"的。',
+                whyCategory: '认知类方法关注的是"大脑如何处理信息"。生成效应揭示了主动构建知识比被动接收记忆更深刻，是提升认知效率的核心原理。',
+                steps: [
+                    '遇到问题时，先自己想一想',
+                    '不要急着查答案或看提示',
+                    '试着自己推导、编造记忆口诀',
+                    '最后再和标准答案对照',
+                    '自己推导出的结论记忆最深刻'
+                ],
+                visual: {
+                    type: 'compare',
+                    badLabel: '被动接收',
+                    bad: '看书十遍<br>抄写答案<br>看视频讲解',
+                    goodLabel: '主动生成',
+                    good: '闭眼回忆<br>自己编口诀<br>先做后看答案'
+                },
+                imageExample: '学历史时，不要直接背"辛亥革命的意义"，而是先自己想"如果我是当时的革命者，我会希望这个革命带来什么"，然后再对照课本。',
+                tips: 'AI给提示比给答案更有效。遇到问题时先自己想，实在想不出来再让AI给线索，而不是直接给完整答案。'
+            },
+            {
+                id: 14,
+                name: '必要难度',
+                en: 'Desirable Difficulty',
+                category: 'cognition',
+                icon: '⚡',
+                tag: '认知类',
+                tier: 'T2',
+                tierText: '进阶',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '学习时越费力，记忆越深刻',
+                desc: '认知科学家罗伯特·比约克提出的理论。学习时增加一点难度，当时觉得更费劲，但长期来看记忆更牢固。',
+                longDesc: '罗伯特·比约克是美国当代最重要的认知科学家之一。他在"必要难度"理论中指出，学习过程中的"费力感"不是障碍，反而是学习的助力。\n\n传统学习观认为"学得越轻松，效果越好"，但比约克的研究证明恰恰相反。轻松的阅读因为太容易，大脑加工深度不够，记忆痕迹浅。增加难度的学习（如间隔重复、主动回忆）虽然当时感觉更费劲，但记忆效果更好。\n\n"必要难度"的关键是"必要"二字——不是越难越好，而是"恰到好处的难度"，跳一跳能够到的难度。',
+                whyCategory: '认知类方法帮助我们理解"为什么这样学有效"。必要难度理论是理解间隔重复、主动回忆等方法有效性的底层原理。',
+                steps: [
+                    '选择间隔重复而不是集中复习',
+                    '选择主动回忆而不是被动重读',
+                    '选择交叉练习而不是单一题海',
+                    '选择手写笔记而不是打字复制',
+                    '接受"学起来有点难"的感觉'
+                ],
+                visual: {
+                    type: 'balance',
+                    left: { label: '太简单', desc: '轻松但无效', level: 'low' },
+                    right: { label: '适度难', desc: '费力但高效', level: 'right' }
+                },
+                tips: '如果学习时感觉很轻松，往往是伪学习。真正的学习需要思考和努力。当你觉得某个方法"有点难"的时候，说明它在起作用。',
+                imageExample: '学英语单词时，把"abandon = 放弃"抄100遍（太简单，写完就忘）。换成：闭眼回忆3次 + 词根词缀分析 + 造一个自己的句子 + 第二天再回忆一遍——虽然过程更费力，但你会发现一个月后还记得。这就是"必要的费力"。'
+            },
+            {
+                id: 15,
+                name: '记忆宫殿',
+                en: 'Method of Loci',
+                category: 'memory',
+                icon: '🏛️',
+                tag: '记忆类',
+                tier: 'T2',
+                tierText: '进阶',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '把要记的东西放在熟悉的空间位置里',
+                desc: '古罗马时期就有的记忆术。选择一个你熟悉的地方（如你家），把要记的信息"放在"沿途的各个位置，回忆时"走"一遍就行。',
+                longDesc: '记忆宫殿（又称位置记忆法）是已知最古老的空间记忆技巧之一，据说古罗马政治家西塞罗在演讲时就用它记住长篇讲稿。\n\n这套方法的原理是：人类大脑擅长记忆空间位置和视觉图像。通过把抽象信息转化为生动的视觉图像，并把这些图像"放在"熟悉的空间位置里，你就创造了一个强大的记忆线索网络。\n\n记忆宫殿特别适合记忆需要按顺序回忆的内容（如历史年代、演讲稿、扑克牌顺序）。普通人经过训练，可以记住几百位随机数字。',
+                whyCategory: '记忆类方法的进阶技巧。间隔重复解决"什么时候复习"的问题，记忆宫殿则解决"如何记住无规律信息"的问题，是高阶记忆术的代表。',
+                steps: [
+                    '选择一个熟悉的空间路线（如从家门口到卧室）',
+                    '规划沿途的"记忆桩"（如门、沙发、餐桌）',
+                    '把要记的信息转化为生动有趣的图像',
+                    '把图像"放在"每个记忆桩上',
+                    '回忆时在脑中"走过"这条路线'
+                ],
+                tips: '适合记忆无规律的信息（如历史年代、扑克牌顺序），日常知识学习用间隔重复更高效。图像越夸张、越荒诞，记忆效果越好。',
+                imageExample: '要记住"秦始皇焚书坑儒"这个历史事件：想象你家门口（记忆桩1）站着一个凶残的秦始皇在烧书（焚书），书烧着的烟味飘到客厅沙发（记忆桩2）上，沙发上坐着的孔子被绑起来埋进土里（坑儒）。回忆时从家门口走到卧室，焚书坑儒就顺下来了。'
+            },
+            {
+                id: 16,
+                name: '艾宾浩斯复习表',
+                en: 'Ebbinghaus Review Schedule',
+                category: 'memory',
+                icon: '📅',
+                tag: '记忆类',
+                tier: 'T1',
+                tierText: '入门',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '按固定时间节点复习，形成长期记忆',
+                desc: '根据艾宾浩斯遗忘曲线设计的复习时间表。德国心理学家艾宾浩斯研究发现，遗忘速度先快后慢，复习应该"前密后疏"。',
+                longDesc: '1885年，德国心理学家赫尔曼·艾宾浩斯通过对自己的长期记忆实验，绘制出了著名的"遗忘曲线"。这条曲线揭示了一个关键发现：遗忘不是均匀的，而是"先快后慢"。\n\n根据遗忘曲线，最有效的复习时机是：学习后20分钟、1小时、9小时、1天、2天、6天、1个月……通过在不同时间点复习，你可以把大部分信息最终转化为长期记忆。\n\n艾宾浩斯复习表就是把这个原理变成可执行的表格，让你明确知道"什么时候该复习什么"。',
+                whyCategory: '记忆类方法的执行工具。艾宾浩斯复习表把"在正确时间复习"这个原则变成可追踪的日程，是间隔重复的具体实现方式。',
+                steps: [
+                    '学习新内容后，立即复习一次',
+                    '20分钟后复习第二次',
+                    '1天后复习第三次',
+                    '3天后复习第四次',
+                    '7天、14天、30天……继续拉长间隔'
+                ],
+                tips: '可以用艾宾浩斯表格记录复习日期，按表执行。AI可以自动计算下次复习时间并提醒你，保持复习的规律性。',
+                imageExample: '周一学了一篇古文《滕王阁序》。当天晚上复习一遍（20分钟后），周三早上再看一遍（1天后），周六再复习（3天后），下周三复习（7天后）——到下个月考试时，这篇古文已经记得非常牢了。'
+            },
+            {
+                id: 17,
+                name: '测试效应',
+                en: 'Testing Effect',
+                category: 'cognition',
+                icon: '✍️',
+                tag: '认知类',
+                tier: 'T1',
+                tierText: '入门',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '考试本身就是学习，不是检验学习',
+                desc: '研究表明，主动检索（考试）比被动复习更能强化记忆。考试不是"考完就结束"，考完后的订正才是学习的关键。',
+                longDesc: '"测试效应"是美国心理学家阿杰·罗森塔尔在1960年代首先系统研究的。他发现，参加测试的学生比只重复阅读的学生记忆效果好得多。\n\n这个发现颠覆了传统教育观念——考试不是"检验"学习的工具，而是"强化"学习的手段。考试本身就是在进行主动回忆，是最好的学习方式之一。\n\n测试效应的关键在于"测试后反馈"。只测不看答案是没用的，测完后对照正确答案、分析错因、针对性复习——这才是完整的学习闭环。',
+                whyCategory: '认知类方法揭示"为什么这样学有效"。测试效应证明了"检索"本身就能强化记忆，是间隔重复、主动回忆等方法有效性的证据。',
+                steps: [
+                    '学完一个章节后，给自己出一套题',
+                    '闭卷考试，当作真正的考试',
+                    '批改后，不只看分数，重点分析错题',
+                    '针对错题回到教材重新学习',
+                    '隔段时间再做一遍这套题'
+                ],
+                visual: {
+                    type: 'flowchart',
+                    nodes: ['学完章节内容', '闭卷自测', '批改分析错题', '回到教材查漏补缺', '再次测试同一套题', '形成完整学习闭环']
+                },
+                imageExample: '学完"三角函数"这一章，不要只是再看一遍笔记（被动复习）。正确做法：找一套测试卷限时做30分钟（自测），批改后发现错了3道关于正弦定理的题（分析），回到教材专门看正弦定理那两页并重新推导（针对性复习），一周后再做一遍同一套卷子（巩固）。这时你会发现分数学涨了，而且对正弦定理的理解完全不一样了。',
+                tips: 'AI可以随时生成测试题，让"考试"变成日常学习的一部分，而不是只在期末才发生。建议每周至少进行一次自测。'
+            },
+            {
+                id: 18,
+                name: '渐进式阅读',
+                en: 'Progressive Reading',
+                category: 'reading',
+                icon: '📚',
+                tag: '阅读类',
+                tier: 'T2',
+                tierText: '进阶',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '多轮阅读，由浅入深，逐步突破',
+                desc: '分轮次阅读文本，每轮带着不同目的。第一轮泛读抓大意，第二轮细读找重点，第三轮研读攻难点。',
+                longDesc: '渐进式阅读的核心理念是"分而治之"。面对一本难书或一篇复杂论文，一次性从头读到尾往往收效甚微——要么被难点卡住，要么读完后脑子里一片模糊。\n\n渐进式阅读把阅读分成多个轮次，每轮有明确目标：第一轮建立全局感，知道"这本书在讲什么"；第二轮深入细节，找出"哪些是关键信息"；第三轮攻克难点，思考"这些观点对不对"。\n\n这种方法特别适合：教材、学术论文、专业书籍等需要深度理解的内容。',
+                whyCategory: '阅读类方法的进阶技巧。适合需要深度理解的长文本，通过多轮阅读逐步加深理解，比一次性精读效率更高。',
+                steps: [
+                    '第一轮：快速浏览，了解文章结构和大概内容',
+                    '第二轮：仔细阅读，标记不懂的地方',
+                    '查资料解决第二轮的疑问',
+                    '第三轮：带着问题读，尝试总结核心观点',
+                    '用自己的话写出读后感'
+                ],
+                tips: '不是每篇文章都需要三轮阅读，根据内容难度和重要程度灵活调整。越重要的内容越值得多轮阅读。',
+                imageExample: '读一本《经济学原理》：第一轮快速翻看目录、各章标题和图表，知道全书分供给、需求、市场均衡等几个大部分。第二轮细读"供给与需求"章节，划出核心概念。第三轮针对"价格弹性"这个难懂的点，查视频和案例，直到能用经济学原理解释日常生活中的定价现象。'
+            },
+            {
+                id: 19,
+                name: '双编码理论',
+                en: 'Dual Coding Theory',
+                category: 'cognition',
+                icon: '🎨',
+                tag: '认知类',
+                tier: 'T2',
+                tierText: '进阶',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '同时用文字和图像两种方式编码信息',
+                desc: '心理学家艾伦·派维奥提出。信息同时用语言和图像两种形式编码，记忆会更牢固。比如学习"光合作用"时，同时看文字和示意图。',
+                longDesc: '艾伦·派维奥是加拿大认知心理学家，他在1971年提出了双编码理论——大脑处理信息有两种方式：语言通道和视觉通道。\n\n当信息同时通过这两种通道进入大脑时，它们会互相强化。举个例子：学习"光合作用"时，如果你只看文字描述，大脑只用语言通道处理；但如果同时看示意图，大脑的语言通道和视觉通道同时激活，记忆效果会大幅提升。\n\n这就是为什么图表、流程图、概念图在学习中如此有用——它们调用了大脑的另一个加工通道。',
+                whyCategory: '认知类方法揭示"大脑如何加工信息"。双编码理论解释了为什么图文结合比纯文字学习更有效，是优化学习方式的底层原理。',
+                steps: [
+                    '学习新概念时，找相关的图示或视频',
+                    '尝试把抽象概念画成简单的图',
+                    '看视频时听讲解，同时观察画面',
+                    '学完后自己画一张概念图',
+                    '用图像+语言两种方式复述'
+                ],
+                visual: {
+                    type: 'network',
+                    center: '📚',
+                    nodes: [
+                        { icon: '📝' },
+                        { icon: '🖼️' },
+                        { icon: '🎬' },
+                        { icon: '📊' },
+                        { icon: '🗺️' }
+                    ]
+                },
+                imageExample: '学习"光的折射"时，不只是背"光从空气进入水中会发生偏折"，而是想象一根筷子插进水里看起来弯了——文字+画面一起记，效果翻倍。',
+                tips: 'AI可以帮你生成简单的示意图或流程图，配合文字一起学习。看视频教程比只看文字教程效果更好，因为调动了多个感官。'
+            },
+            {
+                id: 20,
+                name: '元认知策略',
+                en: 'Metacognition',
+                category: 'cognition',
+                icon: '🔭',
+                tag: '认知类',
+                tier: 'T3',
+                tierText: '高阶',
+                level: '长期收益',
+                levelClass: 'level-low',
+                shortDesc: '"思考自己的思考"，监控和调节学习过程',
+                desc: '元认知就是对认知的认知。学习过程中停下来问自己：我真的理解了吗？我用的方法对吗？我应该调整吗？',
+                longDesc: '元认知概念由美国心理学家John Flavell在1970年代提出，被认为是"学会学习"的核心能力。\n\n简单来说，元认知就是"跳出自己看自己"的能力：你能监控自己的思考过程，评估自己是否理解，并据此调整学习策略。\n\n举个例子：普通学习者读完一章书，可能不知道自己到底懂没懂；但有元认知能力的人会问自己："我能用自己的话解释这个概念吗？如果不能，哪里卡住了？我需要重新读一遍吗？"这种自我监控能力是高效学习者的共同特征。',
+                whyCategory: '认知类方法的顶层能力。元认知不是具体的学习技巧，而是"对学习过程的监控和调节"。掌握元认知，才能真正做到"会学习"。',
+                steps: [
+                    '学习前问：我为什么要学这个？需要多久？',
+                    '学习中问：我跟上进度了吗？哪里卡住了？',
+                    '学习后问：我真的学会了吗？能讲出来吗？',
+                    '发现问题时问：需要换方法吗？需要求助吗？',
+                    '定期回顾：这段时间学习效率如何？'
+                ],
+                visual: {
+                    type: 'flowchart',
+                    nodes: [
+                        '设定学习目标',
+                        '执行学习计划',
+                        '监控：现在进展如何？',
+                        '评估：我真的理解了吗？',
+                        '调整：需要换方法吗？'
+                    ]
+                },
+                imageExample: '读一章书后，合上书问自己："我能向一个10岁小孩解释这个概念吗？如果不能，第3段哪里我没想通？"——这就是元认知的日常练习。',
+                tips: 'AI可以定期"检查"你的学习状态，帮你问自己这些问题，比自己反思更客观。建议每天学习结束后做5分钟的元认知复盘。'
+            },
+            {
+                id: 21,
+                name: '输出倒逼输入',
+                en: 'Output-Driven Input',
+                category: 'output',
+                icon: '📤',
+                tag: '输出类',
+                tier: 'T1',
+                tierText: '入门',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '先确定要输出什么，再针对性输入',
+                desc: '不是先学够了再输出，而是先确定要做什么，再去学需要的部分。费曼学习法就是这个逻辑的典型应用。',
+                longDesc: '"先学再做"是大多数人的默认模式，但这种方式效率很低——因为你不知道学到什么程度才算"够"，学到的东西也不知道怎么用。\n\n输出倒逼输入的逻辑完全不同：先确定你要完成什么作品/任务，然后评估"我现在会什么、不会什么"，最后有针对性地学习需要的部分。\n\n做项目是最好的输出倒逼输入方式。比如你想学编程，最快的方式不是先上一堆课，而是直接动手做一个项目，碰到不会的再去查。这种"做中学"比"学完再做"效率高得多。',
+                whyCategory: '输出类方法强调"以终为始"的学习策略。不是漫无目的地学，而是带着明确目标学。输出是检验输入的唯一标准。',
+                steps: [
+                    '确定一个要完成的输出目标（如写一篇文章）',
+                    '评估自己现有的知识储备',
+                    '识别知识缺口，有针对性地学习',
+                    '边学边输出，而不是学完再输出',
+                    '完成后复盘，补充遗漏'
+                ],
+                tips: '做项目是最好的输出倒逼输入方式——做一个完整项目，你会学到比任何课程都多的东西。建议每个学习阶段都设定一个具体的输出目标。',
+                imageExample: '想学视频剪辑，不要先上一堆课程。直接宣布："我要剪一个2分钟的旅行视频。"然后动手做——不会转场特效？去搜教程；不会调色？去查资料；不知道配什么音乐？去听歌单。做完了，你已经掌握了这个工具的核心用法。'
+            },
+            {
+                id: 22,
+                name: '错题本',
+                en: 'Error Notebook',
+                category: 'note',
+                icon: '📕',
+                tag: '笔记类',
+                tier: 'T1',
+                tierText: '入门',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '把做错的题记录下来，定期复习',
+                desc: '中国学生最熟悉的学习方法之一。核心是"不贰过"——同样的错误不犯第二次。',
+                longDesc: '"不贰过"出自《论语》，意思是同样的错误不犯第二次。错题本就是实现这个目标的工具。\n\n错题本的价值在于：它把"你不会什么"从模糊的感觉变成清晰的记录。大多数人犯过的错误会一犯再犯，因为考完后就把试卷扔了，没有系统地回顾和消化。\n\n一个好的错题本不只是记录错题，还要包括：错误原因分析、正确解法、涉及的知识点、以及同类题目的举一反三。关键是定期复习，否则错题本就是白抄。',
+                whyCategory: '笔记类方法的实战应用。错题本把做错的题目转化为学习资源，是"吃一堑长一智"的系统化实现。',
+                steps: [
+                    '做题时把错题标记出来',
+                    '抄录或拍照保存错题',
+                    '分析错误原因（粗心/概念不清/方法不对）',
+                    '写出正确解法和涉及的知识点',
+                    '定期复习错题，确保真正掌握'
+                ],
+                tips: '错题本的关键是定期复习，否则就是白抄。建议每周复习一次所有错题，确保同样的错误不犯第二次。AI可以帮你自动整理错题、生成相似题目练习。',
+                imageExample: '数学考试错了2道题：1）二元一次方程算错了（粗心）；2) 完全没思路（概念不清）。抄到错题本：写上"粗心——草稿纸要写工整，下次考试留10分钟检查计算题"；"概念不清——重新看教材P45-P50，做课后习题3道，周末再复习一遍"。'
+            },
+            {
+                id: 23,
+                name: '康奈尔笔记法',
+                en: 'Cornell Note-Taking',
+                category: 'note',
+                icon: '📝',
+                tag: '笔记类',
+                tier: 'T1',
+                tierText: '入门',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '5R笔记法：记录、简化、背诵、反思、复习',
+                desc: '康奈尔大学图书馆研究员Walter Pauk发明的笔记系统，包含5个步骤（Record、Reduce、Recite、Reflect、Review），简称5R。',
+                longDesc: 'Walter Pauk设计的Cornell笔记法包含5个R开头的步骤，这是一个完整的笔记处理流程：\n\nRecord（记录）：在右侧大栏快速记录上课或读书内容，不求完整但求及时。\nReduce（简化）：课后立即在左栏写下关键词、问题提示，这一步是强制你消化内容。\nRecite（背诵）：遮住右侧笔记，只看左栏问题，自己回忆并复述内容。\nReflect（反思）：在底部写下总结和心得，用自己的话概括这页笔记的核心。\nReview（复习）：定期回顾，先回忆再阅读，提高记忆效率。\n\n这套方法把"记笔记"升级为"处理信息"的完整流程。',
+                whyCategory: '笔记类方法的标准流程。Cornell笔记法是笔记系统的经典代表，适合需要大量听课或读书的场景。',
+                steps: [
+                    'Record（记录）：右侧大栏快速记录上课内容',
+                    'Reduce（简化）：课后左侧栏写上关键词/问题',
+                    'Recite（背诵）：遮住右侧，只看左侧回忆内容',
+                    'Reflect（反思）：底部写下总结和心得',
+                    'Review（复习）：先回忆再阅读，每周定期复习'
+                ],
+                tips: '康奈尔笔记法的关键是"Recite"环节——必须合上笔记凭记忆回忆，这个过程比抄笔记更重要。不要跳过回忆步骤。',
+                imageExample: '上完化学课后，在笔记本右侧写下实验步骤和注意事项。课后在左侧写下关键词"蒸馏"、"沸点"、"冷凝管"。然后合上笔记本，看着左侧的"蒸馏"两个字，自己复述一遍蒸馏的原理和操作步骤。最后底部写下"这节课学会了用蒸馏提纯液体"——这才算完整的Cornell笔记。'
+            },
+            {
+                id: 24,
+                name: '四象限法则',
+                en: 'Eisenhower Matrix',
+                category: 'goal',
+                icon: '📊',
+                tag: '目标类',
+                tier: 'T1',
+                tierText: '入门',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '按重要性和紧急性把任务分成四类',
+                desc: '艾森豪威尔提出，把任务按"重要/不重要"和"紧急/不紧急"分成四个象限，决定做事的优先级。',
+                longDesc: '德怀特·艾森豪威尔是美国第34任总统，二战时期盟军最高统帅。他以超强的执行力著称，每天要处理无数事务。\n\n他曾说："最紧迫的决策往往不是最重要的决策。"这句话成为四象限法则的核心理念。\n\n四象限法则把任务分成：\n- 第一象限（重要且紧急）：立即处理，如危机、截止日期\n- 第二象限（重要不紧急）：计划去做，这是成长和发展的关键\n- 第三象限（紧急不重要）：委托他人，减少在这上面花的时间\n- 第四象限（不紧急不重要）：删除或减少，这是浪费时间的主要来源\n\n大多数人的问题是：沉迷第三象限的"紧迫感"，却忽略了第二象限真正重要的事。',
+                whyCategory: '目标类方法的优先级工具。四象限法则帮助区分"真正重要的事"和"看起来紧迫的事"，是时间管理的第一步。',
+                steps: [
+                    '列出所有待办事项',
+                    '判断每件事的重要程度',
+                    '判断每件事的紧急程度',
+                    '放入对应象限：重要+紧急立即做，重要+不紧急计划做',
+                    '不重要+紧急委托做，不重要+不紧急删除'
+                ],
+                tips: '大部分人死在"紧急"象限里，真正重要的事（学习、健身、建立人脉）往往不紧急但很重要。建议每天至少花1-2小时在第二象限。',
+                imageExample: '把本周任务分类："明天要交的作业"是第一象限（重要紧急）；"每天背单词"是第二象限（重要不紧急）；"回复同学群消息"是第三象限（紧急不重要，委托或快速处理）；"刷短视频"是第四象限（直接删掉）。把精力多放在第二象限，这是拉开与别人差距的关键。'
+            },
+            {
+                id: 25,
+                name: 'PDCA循环',
+                en: 'PDCA Cycle',
+                category: 'goal',
+                icon: '🔄',
+                tag: '目标类',
+                tier: 'T2',
+                tierText: '进阶',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '计划-执行-检查-改进，持续迭代',
+                desc: '管理学中的质量改进模型，同样适用于学习。每个学习周期都经历Plan-Do-Check-Act，不断优化学习方法。',
+                longDesc: 'PDCA循环由质量管理专家威廉·爱德华兹·戴明在上世纪50年代提出，最初用于企业质量管理，后来被广泛应用于各领域的学习和持续改进。\n\nPDCA的四个步骤：\nPlan（计划）：制定学习目标和具体的执行计划\nDo（执行）：按计划执行学习任务\nCheck（检查）：评估学习效果，对照目标找出差距\nAct（改进）：根据检查结果调整学习方法，进入下一个PDCA循环\n\nPDCA的核心是"持续迭代"——不是制定一个完美计划然后执行到底，而是小步快跑、快速迭代。每次循环都比上次更好。',
+                whyCategory: '目标类方法的持续改进框架。四象限法则解决"做什么"的优先级问题，PDCA解决"怎么做"的执行改进问题。',
+                steps: [
+                    'Plan（计划）：制定学习目标和计划',
+                    'Do（执行）：按计划执行学习任务',
+                    'Check（检查）：评估学习效果，找出差距',
+                    'Act（改进）：调整方法，进入下一个循环',
+                    '循环往复，每次都比上次更好'
+                ],
+                tips: '很多人只做"执行"，从不"检查"和"改进"。没有复盘的学习是在重复错误。建议每周做一次PDCA回顾。',
+                imageExample: '本周计划（Plan）学完三角函数这一章，每天做10道题（Do）。周末检查（Check）：发现正弦定理正确率只有60%，错题集中在边角互换类型。下周（Act）：调整计划，每天加练5道教辅的边角互换题，用不同颜色的笔标注难点。第三周再检查效果有没有提升。'
+            },
+            {
+                id: 26,
+                name: 'SQ4R阅读法',
+                en: 'SQ4R Method',
+                category: 'reading',
+                icon: '📖',
+                tag: '阅读类',
+                tier: 'T2',
+                tierText: '进阶',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: 'SQ3R升级版，增加Reflect和Record两个环节',
+                desc: 'SQ3R的升级版，增加了Reflect（思考）和Record（记录）两个步骤，更强调阅读中的主动思考和笔记。',
+                longDesc: 'SQ4R是SQ3R的升级版，在原有五步基础上增加了两个R开头的步骤：\n\nSurvey（浏览）：快速了解文章结构\nQuestion（提问）：写下想解答的问题\nRead（阅读）：带着问题阅读\nReflect（反思）：边读边思考，与已有知识联系\nRecite（复述）：读完后回忆要点\nReview（复习）：回顾全文，检查问题是否解答\n\nReflect环节是SQ4R和SQ3R的核心区别。这个步骤要求你在阅读时主动思考：新信息与已有知识有什么联系？这个观点对不对？如果换一种理解方式呢？\n\n这种深度思考把阅读从"被动接收"变成"主动对话"，大幅提升理解和记忆效果。',
+                whyCategory: '阅读类方法的进阶版本。比SQ3R多了"反思"环节，更强调把新知识与已有知识建立联系，适合需要深度理解的阅读。',
+                steps: [
+                    'Survey（浏览）：快速了解文章结构',
+                    'Question（提问）：写下想解答的问题',
+                    'Read（阅读）：带着问题阅读',
+                    'Reflect（反思）：边读边思考，与已有知识联系',
+                    'Recite（复述）：读完后回忆要点',
+                    'Review（复习）：回顾全文，检查问题是否解答'
+                ],
+                tips: 'Reflect环节是SQ4R和SQ3R的核心区别——不只是读进去，还要和已有知识建立联系。读每章时试着问自己："这让我想起了什么？"',
+                imageExample: '读《国富论》中"看不见的手"这一章，先浏览（Survey）知道是讲市场经济，然后问"政府为什么要管市场"（Question），读的时候思考这和初中政治学的"计划经济"有什么区别（Reflect），读完后自己总结"看不见的手"是什么（Recite），最后检查自己的问题有没有都回答了（Review）。'
+            },
+            {
+                id: 27,
+                name: '联想记忆法',
+                en: 'Association Memory',
+                category: 'memory',
+                icon: '🔗',
+                tag: '记忆类',
+                tier: 'T1',
+                tierText: '入门',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '把新信息和已有知识联系起来记忆',
+                desc: '利用事物之间的联系来记忆。新信息与已有知识、经验、图像联系越多，记忆越牢固。',
+                longDesc: '人类大脑天生擅长记忆有关联的信息。孤立的单个信息很难记，但如果你能把新信息与已有的知识、经验、甚至笑话联系起来，记忆效果会大幅提升。\n\n联想法的核心是"嫁接"——把要记的新信息挂到已有的知识网络上。你已有的知识网络越丰富，记忆新东西就越容易，这就是为什么知识面广的人学新东西更快。\n\n夸张、荒诞、情感强烈的联想效果更好，因为大脑对这类信息印象更深。比如要记住"牛奶"和"猫"这两个词，编一个"猫喝牛奶"的夸张场景比单纯记住"牛奶、猫"两个词效果好得多。',
+                whyCategory: '记忆类方法的底层原理。所有记忆技巧（间隔重复除外）的核心都是"建立联系"。理解了联想法，你就理解了为什么各种记忆术会有效。',
+                steps: [
+                    '学习新信息时，问自己：这让我想起什么？',
+                    '找到新信息和已有知识的相似点或对比点',
+                    '创造夸张、荒诞的联想（越离谱越好）',
+                    '把抽象概念具象化成一个画面',
+                    '定期复习这些联想，保持记忆新鲜'
+                ],
+                tips: '联想越夸张、越荒诞越好，因为大脑对奇怪的事物印象更深刻。不要追求"合理"，追求"印象深刻"。',
+                imageExample: '要记住"日本首都是东京"，想象一个穿着和服的胖猫在东京街头走秀，喵喵叫着让人拍照。越荒诞越好——下次有人问你日本首都，你脑子里第一个蹦出来的就是这只胖猫。'
+            },
+            {
+                id: 28,
+                name: '心流学习法',
+                en: 'Flow State Learning',
+                category: 'focus',
+                icon: '🌊',
+                tag: '专注类',
+                tier: 'T3',
+                tierText: '高阶',
+                level: '长期收益',
+                levelClass: 'level-low',
+                shortDesc: '在学习区边缘持续挑战，进入心流状态',
+                desc: '心理学家米哈里·契克森米哈伊提出的心流理论。当挑战难度和技能水平匹配时，人会进入忘我的专注状态，学习效率极高。',
+                longDesc: '米哈里·契克森米哈伊是匈牙利裔美国心理学家，他花了30年时间研究"最优体验"——人什么时候感觉最幸福、最投入。他发现，当挑战和技能达到完美平衡时，人会进入一种"心流"状态。\n\n心流的特点：完全沉浸于正在做的事，感觉时间飞逝，自我意识消失，产出效率极高。运动员称之为"巅峰状态"，艺术家称之为"灵感爆发"。\n\n进入心流的关键是找到"学习区"——任务难度比现有技能略高，既不会太简单（无聊）也不会太难（焦虑）。这是一个需要不断调整的动态平衡。',
+                whyCategory: '专注类方法的终极目标。番茄工作法是培养专注习惯的工具，心流则是专注的最高境界——达到时，学习效率可以提升数倍。',
+                steps: [
+                    '明确一个清晰的学习目标',
+                    '评估当前技能水平',
+                    '选择略高于当前水平的任务（学习区）',
+                    '进入无干扰的环境',
+                    '专注投入，直到进入忘我状态'
+                ],
+                tips: '如果任务太难会焦虑，太简单会无聊。找到"踮脚能够到"的难度，是进入心流的关键。建议从每天15-20分钟开始练习。',
+                imageExample: '学游泳时，不要一直练已经会的蛙泳（太简单会无聊），去挑战一下自由泳转身或者仰漂（有点难但够得到）。找到那个"有点紧张但能完成"的难度，进步最快。'
+            },
+            {
+                id: 29,
+                name: '批评性思维',
+                en: 'Critical Thinking',
+                category: 'cognition',
+                icon: '⚖️',
+                tag: '认知类',
+                tier: 'T3',
+                tierText: '高阶',
+                level: '长期收益',
+                levelClass: 'level-low',
+                shortDesc: '不轻信任何结论，自己分析判断',
+                desc: '对信息保持审慎态度，不盲目接受也不轻易否定，通过逻辑分析形成自己的判断。',
+                longDesc: '批评性思维不是"杠精"——不是为了否定而否定，而是追求"不轻信、不盲从"的理性思考方式。\n\n它的核心是"提问的习惯"：这个信息可靠吗？证据是什么？推理过程有没有漏洞？有没有其他可能的解释？这个结论在什么条件下成立？\n\n在信息爆炸的时代，批评性思维比任何时候都重要。据统计，我们每天接收的信息量是30年前的5倍，但大部分信息是噪音甚至误导。没有批评性思维能力，你就会被各种信息左右。\n\n批评性思维是学习的顶层能力——它决定了你接受什么信息、排斥什么信息，构建起自己的知识体系。',
+                whyCategory: '认知类方法的顶层能力。不是具体技巧，而是思考"如何思考"的能力。掌握批评性思维，才能真正做到独立学习和判断。',
+                steps: [
+                    '遇到观点时问：这是事实还是观点？',
+                    '问：证据是什么？来源可靠吗？',
+                    '问：推理过程有没有逻辑漏洞？',
+                    '问：有没有其他可能的解释？',
+                    '问：这个结论在什么条件下成立？'
+                ],
+                visual: {
+                    type: 'flowchart',
+                    nodes: [
+                        '看到一个观点',
+                        '这是事实还是观点？',
+                        '证据是什么？来源可靠吗？',
+                        '推理有没有逻辑漏洞？',
+                        '有没有其他可能的解释？',
+                        '形成自己的判断'
+                    ]
+                },
+                imageExample: '看到"每天喝8杯水更健康"这个说法，问自己：这是谁说的？有科学依据吗？样本量够大吗？有没有研究反驳这个结论？——然后你可能会发现，这个说法其实来源并不清晰。',
+                tips: '批判性思维需要刻意练习。建议对每天看到的新闻、观点都问自己这五个问题，逐渐培养质疑和分析的习惯。'
+            },
+            {
+                id: 30,
+                name: '知识晶体',
+                en: 'Knowledge Crystal',
+                category: 'cognition',
+                icon: '💎',
+                tag: '认知类',
+                tier: 'T2',
+                tierText: '进阶',
+                level: '长期收益',
+                levelClass: 'level-low',
+                shortDesc: '把零散知识结构化，变成可调用的晶体',
+                desc: '古典老师在《跃迁》中提出的概念。零散的信息只是"沙子"，结构化的知识才是"钻石"。知识晶体是知识从输入到输出的中间形态。',
+                longDesc: '"知识晶体"这个概念由古典老师在《跃迁》中提出，灵感来自认知科学。\n\n沙子和水混在一起，还是沙子和水；但如果把碳原子按特定结构排列，就能变成钻石。知识也一样——零散的信息记再多，也只是"知道"，只有结构化的知识才能被灵活调用。\n\n知识晶体的价值在于：它让你从"知道有什么"变成"能用什么"。比如你看了很多商业案例，但如果没有结构化（战略、组织、执行），遇到实际问题时就调不出来。\n\n常见的知识结构：时间结构（过去-现在-未来）、空间结构（内部-外部）、因果结构（原因-经过-结果）、对比结构（相同-不同）。',
+                whyCategory: '认知类方法的结构化工具。知识晶体解决"信息如何组织"的问题，是把碎片化知识转化为系统性知识的关键步骤。',
+                steps: [
+                    '收集相关的知识点',
+                    '找出知识点之间的关系',
+                    '用某种结构组织起来（时间顺序、空间顺序、因果关系等）',
+                    '给这个结构起个名字',
+                    '以后遇到新知识，尝试挂到这个结构上'
+                ],
+                visual: {
+                    type: 'tree',
+                    root: '知识晶体',
+                    branches: ['时间结构', '空间结构', '因果结构', '对比结构']
+                },
+                imageExample: '学习商业知识时，不要只记"SWOT分析"，而是把它归类到"对比结构"下——与其他分析框架比较，找出异同点，这样记得更牢。',
+                tips: '常见的知识结构：时间结构（过去-现在-未来）、空间结构（内部-外部）、因果结构（原因-经过-结果）。建立自己的知识晶体库，遇到新知识时先问"它属于哪个结构"。'
+            },
+            {
+                id: 31,
+                name: '快速阅读',
+                en: 'Speed Reading',
+                category: 'reading',
+                icon: '⚡',
+                tag: '阅读类',
+                tier: 'T2',
+                tierText: '进阶',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '扩大视幅、减少回视，提升阅读速度',
+                desc: '通过训练眼睛移动方式和减少默读习惯来提升阅读速度。核心是"眼脑直映"，不经过听觉直接理解文字含义。',
+                longDesc: '大多数人的阅读速度受限于两个习惯：逐字阅读和脑中默读（即"默读"或"内语"）。\n\n普通人的阅读速度约为200-250字/分钟，而经过训练的人可以做到500-800字/分钟，同时保持理解力。\n\n快速阅读的核心是"眼脑直映"——让眼睛看到文字后直接传递到大脑处理，而不需要经过"听到声音"这个中间步骤。我们小时候学阅读时习惯"拼读"，这个习惯成年后反而成为速度的障碍。\n\n需要注意：快速阅读不是万能的。它适合信息性内容（如新闻、报告），不适合需要深度理解的教材或复杂论文。速度提升要以理解为代价，需要根据内容类型灵活选择。',
+                whyCategory: '阅读类方法的效率工具。适合需要大量阅读信息的场景，通过提升阅读速度节省时间，但需要根据内容类型选择性使用。',
+                steps: [
+                    '指读法：用手指引导视线，减少回视',
+                    '扩大视幅：一次看一个词组而非单个字',
+                    '减少默读：有意识加快，抑制脑中念出声的习惯',
+                    '略读技巧：先看首尾段落和每段首句',
+                    '每天练习15-20分钟，逐渐提升速度'
+                ],
+                tips: '快速阅读适合信息性内容，不适合需要深度理解的教材。速度提升要以理解为代价，不要盲目追求速度。建议先用快速阅读过一遍，再针对重点慢读。'
+            },
+            {
+                id: 32,
+                name: '主题学习法',
+                en: 'Topic-Based Learning',
+                category: 'goal',
+                icon: '🎯',
+                tag: '目标类',
+                tier: 'T1',
+                tierText: '入门',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '围绕一个主题，集中一段时间深入研究',
+                desc: '选定一个主题后，在一段时间内集中所有学习资源，只学与这个主题相关的内容，快速建立该领域的知识体系。',
+                longDesc: '主题学习法的理念是"先深后广"——在一个领域建立扎实的基础后，再横向扩展。\n\n传统学习模式是按课程大纲来——数学学一点、英语学一点、历史学一点……这种方式效率很低，因为每次切换科目都要花时间"热身"，而且各科知识之间无法互相强化。\n\n主题学习则相反：集中所有时间只学一个主题。比如"数据分析"，就只学与数据分析相关的内容：统计学、Python、可视化、案例……学完一个主题再进入下一个。\n\n这种方法的优势是：注意力集中、上下文统一、知识之间互相强化。但也有风险——过于专注一个主题可能忽略其他重要领域。需要平衡。',
+                whyCategory: '目标类方法的知识获取策略。主题学习解决"学什么"的深度问题，适合建立某个领域的系统性能力。',
+                steps: [
+                    '选定一个感兴趣或需要的主题',
+                    '列出与这个主题相关的所有问题',
+                    '收集3-5本相关书籍/课程',
+                    '集中一段时间，只学这个主题',
+                    '学完后尝试输出一篇总结或教给别人'
+                ],
+                tips: '主题学习期间要克制"这个也想学"的冲动，专注当前主题才有深度。建议每个主题学习周期为2-4周，完成后再进入下一个主题。'
+            },
+            {
+                id: 33,
+                name: '辩论性思维',
+                en: 'Dialectical Thinking',
+                category: 'cognition',
+                icon: '⚡',
+                tag: '认知类',
+                tier: 'T3',
+                tierText: '高阶',
+                level: '长期收益',
+                levelClass: 'level-low',
+                shortDesc: '同时持有两个相反观点，寻找第三种可能',
+                desc: '黑格尔辩证法的核心是"正-反-合"：任何观点都有其对立面，两个对立面的统一就是"合"。辩论性思维让你看到问题的多个面。',
+                longDesc: '辩论性思维是黑格尔辩证法的思维模式，强调"正题-反题-合题"的思考路径。\n\n它的核心是：任何一个观点，都有它的对立面（反题）。通过分析正题和反题的合理性与局限性，我们可以找到一个更高层次的理解（合题）。\n\n这种思维方式的好处是：它能帮你避免非黑即白的思维。你不再简单地说"这个对/错"，而是理解"在什么条件下对，在什么条件下可能错"。\n\n历史上的伟人几乎都擅长辩证思维——他们能看到对手观点中的合理之处，也能看到自己观点中的局限性，从而找到更好的解决方案。',
+                whyCategory: '认知类方法的进阶思维模式。辩论性思维解决"如何处理矛盾观点"的问题，是培养批判性思维和创新能力的基础。',
+                steps: [
+                    '找到一个你认同的观点（正题）',
+                    '尝试找出这个观点的问题或局限性（反题）',
+                    '分析反题中有哪些合理之处',
+                    '思考正题和反题能否统一',
+                    '找到一个更高层次的理解或解决方案（合题）'
+                ],
+                visual: {
+                    type: 'flowchart',
+                    nodes: [
+                        '正题：认同的观点',
+                        '反题：找出问题/局限性',
+                        '分析：反题合理在哪？',
+                        '综合：正+反=合',
+                        '新理解：更高层次的认识'
+                    ]
+                },
+                imageExample: '有人说"成功靠努力"，另一个人说"成功靠运气"。辩证思维会问：努力和运气各在什么情况下起作用？有没有可能努力是"让运气更容易发生"的条件？这就是从对立中找统一的思考方式。',
+                tips: '辩论性思维需要刻意练习。可以从每天的讨论开始，对任何观点都尝试找出它的"反题"，然后思考有没有更高层次的理解。'
+            },
+            {
+                id: 34,
+                name: '图像锁链法',
+                en: 'Image Chain Method',
+                category: 'memory',
+                icon: '🔗',
+                tag: '记忆类',
+                tier: 'T2',
+                tierText: '进阶',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '把要记的东西变成荒诞图像，串成链子',
+                desc: '图像锁链法是记忆术的一种。把要记的每样东西变成荒诞、夸张、离谱的图像，然后把它们像锁链一样一个扣一个串起来。',
+                longDesc: '图像锁链法是记忆宫殿的简化版，特别适合记忆有顺序的信息。\n\n核心原理：用荒诞夸张的图像代替普通物品。大脑对荒诞的事物印象特别深刻，因为荒诞的东西会激发情绪，而情绪能大幅增强记忆。\n\n举个例子：要记购物清单（牛奶、面包、苹果），普通方法是反复念"牛奶面包苹果"。图像锁链法是：想象一大瓶牛奶倒在面包上，面包变成一艘船，船上有苹果在跳舞——越荒诞越好。\n\n这种方法的威力在于：荒诞的图像会让你"忘不了"。而且因为有顺序，回忆时按顺序提取就行。',
+                whyCategory: '记忆类方法的图像化应用。图像锁链法解决"如何记住有顺序的信息"的问题，用荒诞联想代替死记硬背。',
+                steps: [
+                    '列出要记的所有内容',
+                    '把每项内容转化成一个具体的图像',
+                    '让图像变得荒诞、夸张、有趣',
+                    '按顺序把图像"锁"在一起',
+                    '回忆时顺着图像链提取'
+                ],
+                visual: {
+                    type: 'path',
+                    nodes: ['🧠', '🔥', '🌊', '⚡', '🎯']
+                },
+                imageExample: '要记住"学习金字塔"（听讲5%、阅读10%、视听20%、演示30%、讨论50%、实践75%、教授90%），想象一个大脑在听摇滚乐（听），然后跳进书里（阅读），书变成电视（视听）——越离谱越好。',
+                tips: '图像越荒诞、越离谱，记忆效果越好。不要追求"合理"，要追求"意想不到"。可以用夸张的尺寸、奇怪的材质、不可能的组合来增加荒诞感。'
+            },
+            {
+                id: 35,
+                name: '故事串联法',
+                en: 'Story Chain Method',
+                category: 'memory',
+                icon: '📖',
+                tag: '记忆类',
+                tier: 'T1',
+                tierText: '入门',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '把要记的东西编成一个故事',
+                desc: '把要记忆的内容串进一个故事里，通过故事的逻辑和情节来记住零散的信息。',
+                longDesc: '故事串联法利用了人类大脑对"故事"的天然偏好。\n\n我们天生就擅长记住故事——因为故事有情节、有情感、有因果关系。大脑会自动把故事当成一个整体来记忆，而不是零散的碎片。\n\n举个例子：要记住"日出、回家、吃饭、睡觉"四个词，普通方法是反复念。故事法是："我站在山顶看日出（日出），然后走回家（回家），妈妈已经做好了饭（吃饭），吃完我就睡觉了（睡觉）"——一个简单的叙事把它们串起来了。\n\n这种方法特别适合记忆有"内在联系"的信息。如果要记的内容本身就有故事性，那就更容易了。',
+                whyCategory: '记忆类方法的叙事化应用。故事串联法利用大脑对故事的结构化记忆能力，把零散信息变成有意义的叙事。',
+                steps: [
+                    '列出要记忆的所有内容',
+                    '找出内容之间可能的故事联系',
+                    '设计一个简单但有趣的情节',
+                    '把内容自然地编进故事里',
+                    '回忆时在脑中"播放"这个故事'
+                ],
+                visual: {
+                    type: 'flowchart',
+                    nodes: [
+                        '列出要记的内容',
+                        '找内容之间的联系',
+                        '设计故事情节',
+                        '编入故事',
+                        '回忆=播放故事'
+                    ]
+                },
+                imageExample: '要记忆历史事件的时间线：焚书坑儒、陈胜起义、楚汉相争、霸王乌江自刎。编一个故事："秦始皇焚书坑儒（残暴），陈胜不服起义（反抗），刘邦项羽楚汉相争（争霸），最后项羽在乌江边自刎（失败）"——一个故事串起一串历史。',
+                tips: '故事不需要文采好，关键是有画面感和情绪。加入夸张、幽默、意外的元素会让记忆更深刻。也可以把自己代入故事主角，增加情感连接。'
+            },
+            {
+                id: 36,
+                name: '配对联想法',
+                en: 'Paired Association',
+                category: 'memory',
+                icon: '🧩',
+                tag: '记忆类',
+                tier: 'T1',
+                tierText: '入门',
+                level: '高效',
+                levelClass: 'level-low',
+                shortDesc: '把两个要记的东西配对，用联想绑在一起',
+                desc: '把两个要记的东西配成一对，用联想把它们绑在一起。回忆时想起一个，就能带出另一个。',
+                longDesc: '配对联想法是最基础的记忆联结术。\n\n核心原理：大脑擅长记住"关系"，不擅长记住"孤立的信息"。如果两个信息之间建立了强烈的联系，记住一个就能带出另一个。\n\n举个例子：学英语时记"apple-苹果"，不是单独记"apple"和"苹果"，而是想象一个苹果上长着汉字"苹果"，或者一个苹果在喊"我疼"——把两个词绑在一起。\n\n这种方法特别适合：背单词、记人名、记概念配对。它的关键是"联想"要强烈、荒诞、有画面感。平淡的联想效果不好。',
+                whyCategory: '记忆类方法的配对应用。配对联想法解决"如何记住配对信息"的问题，是所有复杂记忆术的基础构建块。',
+                steps: [
+                    '确定要配对的两项内容',
+                    '在两项之间建立生动的联想',
+                    '联想越荒诞、夸张越好',
+                    '回忆时触发一个，就能带出另一个',
+                    '定期复习配对，强化联结'
+                ],
+                visual: {
+                    type: 'compare',
+                    badLabel: '普通联想',
+                    bad: 'apple=苹果<br>苹果=水果',
+                    goodLabel: '荒诞联想',
+                    good: '苹果在喊"诶噗"<br>汉字"苹果"长在苹果上'
+                },
+                imageExample: '记"蜜蜂-beekeeper"（养蜂人），想象一个蜜蜂戴着厨师帽在烤肉（bee keeper = 蜜蜂的保管人）——这个荒诞的画面会让你过目不忘。',
+                tips: '联想的关键是"荒诞"和"生动"。平淡的联想（如"苹果是水果"）没有记忆点，荒诞的联想（如"苹果在跳舞"）才印象深刻。'
+            }
+        ];
+
+        // 渲染卡片
+        function renderCards(category = 'all') {
+            const grid = document.getElementById('method-grid');
+            const filtered = category === 'all' ? methods : methods.filter(m => m.category === category);
+            document.getElementById('total-count').textContent = filtered.length;
+
+            grid.innerHTML = filtered.map(m => {
+                const progress = getMethodProgress(m.id);
+                const totalSteps = m.steps.length;
+                const completedSteps = progress.length;
+                const percent = totalSteps > 0 ? (completedSteps / totalSteps * 100) : 0;
+                const isMastered = completedSteps === totalSteps;
+
+                return `
+                <div class="method-card ${isMastered ? 'card-mastered' : ''}" onclick="openModal(${m.id})">
+                    <div class="card-header">
+                        <div class="card-icon ${m.category}">${m.icon}</div>
+                        <span class="card-tag">${m.tag}</span>
+                    </div>
+                    <h3 class="card-title">${m.name}</h3>
+                    <p class="card-en">${m.en}</p>
+                    <p class="card-desc">${m.shortDesc}</p>
+                    <div class="card-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${percent}%"></div>
+                        </div>
+                        <span class="progress-text">${completedSteps}/${totalSteps}</span>
+                    </div>
+                    <div class="card-footer">
+                        <div class="card-tags">
+                            <span class="card-tier tier-${m.tier.toLowerCase()}">${m.tier} ${m.tierText}</span>
+                            <span class="card-level ${m.levelClass}">${isMastered ? '已掌握 ✓' : m.level}</span>
+                        </div>
+                        <span class="card-arrow">→</span>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        // 获取方法进度
+        function getMethodProgress(methodId) {
+            const allProgress = JSON.parse(localStorage.getItem('methodProgress') || '{}');
+            return allProgress[methodId] || [];
+        }
+
+        // 保存方法进度
+        function saveMethodProgress(methodId, completedSteps) {
+            const allProgress = JSON.parse(localStorage.getItem('methodProgress') || '{}');
+            allProgress[methodId] = completedSteps;
+            localStorage.setItem('methodProgress', JSON.stringify(allProgress));
+        }
+
+        // 切换步骤完成状态
+        function toggleStep(methodId, stepIndex) {
+            const completed = getMethodProgress(methodId);
+            const idx = completed.indexOf(stepIndex);
+
+            if (idx > -1) {
+                completed.splice(idx, 1);
+            } else {
+                completed.push(stepIndex);
+            }
+
+            completed.sort((a, b) => a - b);
+            saveMethodProgress(methodId, completed);
+            updateModalSteps(methodId);
+            renderCards();
+        }
+
+        // 更新弹窗中的步骤显示
+        function updateModalSteps(methodId) {
+            const m = methods.find(x => x.id === methodId);
+            const completed = getMethodProgress(methodId);
+            const isMastered = completed.length === m.steps.length;
+
+            // 更新步骤勾选状态
+            document.querySelectorAll('.modal-step').forEach((el, i) => {
+                const isChecked = completed.includes(i);
+                el.classList.toggle('checked', isChecked);
+                el.querySelector('.step-checkbox').classList.toggle('checked', isChecked);
+                el.querySelector('.step-checkbox').textContent = isChecked ? '✓' : '';
+            });
+
+            // 更新进度显示
+            const progressText = document.querySelector('.modal-progress-text');
+            if (progressText) {
+                progressText.innerHTML = `已完成 <span>${completed.length}/${m.steps.length}</span> 步${isMastered ? ' — <span style="color:#52c41a">🎉 已掌握！</span>' : ''}`;
+            }
+
+            // 如果全部完成，更新头部标签
+            const modalTag = document.getElementById('modal-tag');
+            if (isMastered) {
+                modalTag.innerHTML = '🎉 已掌握';
+                modalTag.style.background = 'rgba(82, 196, 26, 0.3)';
+            }
+        }
+
+        // 打开弹窗
+        function openModal(id) {
+            const m = methods.find(x => x.id === id);
+            const completed = getMethodProgress(id);
+            const isMastered = completed.length === m.steps.length;
+
+            document.getElementById('modal-title').textContent = m.name;
+            document.getElementById('modal-en').textContent = m.en;
+            document.getElementById('modal-tag').textContent = isMastered ? '🎉 已掌握' : m.tag;
+            if (isMastered) {
+                document.getElementById('modal-tag').style.background = 'rgba(82, 196, 26, 0.3)';
+            } else {
+                document.getElementById('modal-tag').style.background = 'rgba(255, 255, 255, 0.2)';
+            }
+            document.getElementById('modal-level').textContent = `难度：${m.level}`;
+
+            document.getElementById('modal-body').innerHTML = `
+                <div class="modal-section">
+                    <h4 class="modal-section-title">详细介绍</h4>
+                    <div class="long-desc">${(m.longDesc || m.desc).split('\n').map(p => p.trim()).filter(p => p).map(p => `<p>${p}</p>`).join('')}</div>
+                </div>
+                <div class="modal-section">
+                    <div class="why-category">
+                        <span class="why-category-icon">📌</span>
+                        <div class="why-category-text">
+                            <div class="why-category-title">为什么在${m.tag}</div>
+                            <p>${m.whyCategory}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-section">
+                    <div class="tier-info">
+                        <span class="tier-badge tier-${m.tier.toLowerCase()}">${m.tier}</span>
+                        <span class="tier-desc">${m.tierText} · ${m.level}</span>
+                    </div>
+                </div>
+                <div class="modal-section">
+                    <div class="progress-header">
+                        <h4>操作步骤</h4>
+                        <div class="progress-info modal-progress-text">
+                            已完成 <span>${completed.length}/${m.steps.length}</span> 步${isMastered ? ' — <span style="color:#52c41a">🎉 已掌握！</span>' : ''}
+                        </div>
+                    </div>
+                    <div class="modal-steps">
+                        ${m.steps.map((s, i) => {
+                            const isChecked = completed.includes(i);
+                            return `
+                            <div class="modal-step ${isChecked ? 'checked' : ''}" onclick="toggleStep(${id}, ${i})">
+                                <div class="step-checkbox ${isChecked ? 'checked' : ''}" onclick="event.stopPropagation(); toggleStep(${id}, ${i})">
+                                    ${isChecked ? '✓' : ''}
+                                </div>
+                                <span class="step-num">${i + 1}</span>
+                                <span class="step-content">${s}</span>
+                            </div>
+                        `}).join('')}
+                    </div>
+                </div>
+                ${m.visual ? `
+                <div class="visual-section">
+                    <div class="visual-title">🧩 思维可视化</div>
+                    ${renderVisual(m.visual)}
+                </div>
+                ` : ''}
+                ${m.imageExample ? `
+                <div class="image-example">
+                    <div class="image-example-title">📖 举个例子</div>
+                    <div class="image-example-content">${m.imageExample}</div>
+                </div>
+                ` : ''}
+                <div class="modal-section">
+                    <div class="modal-tip">
+                        <div class="modal-tip-title">💡 小贴士</div>
+                        <p>${m.tips}</p>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('modal').classList.add('active');
+        }
+
+        // 渲染可视化图
+        function renderVisual(visual) {
+            if (!visual) return '';
+
+            switch(visual.type) {
+                case 'flowchart':
+                    return `
+                        <div class="flowchart">
+                            ${visual.nodes.map((node, i) => `
+                                ${i > 0 ? '<div class="flow-arrow">↓</div>' : ''}
+                                <div class="flow-node">
+                                    <span class="flow-num">${i + 1}</span>
+                                    <span class="flow-text">${node}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+
+                case 'tree':
+                    return `
+                        <div class="tree-diagram">
+                            <div class="tree-root">${visual.root}</div>
+                            <div class="tree-branches">
+                                ${visual.branches.map(branch => `
+                                    <div class="tree-branch">
+                                        <div class="tree-connector"></div>
+                                        <div class="tree-leaf">${branch}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+
+                case 'network':
+                    return `
+                        <div class="network-diagram" style="position:relative;width:200px;height:200px;margin:0 auto;">
+                            <div class="network-center">${visual.center}</div>
+                            ${visual.nodes.map((node, i) => {
+                                const angle = (i / visual.nodes.length) * 2 * Math.PI;
+                                const radius = 70;
+                                const x = 100 + radius * Math.cos(angle) - 22;
+                                const y = 100 + radius * Math.sin(angle) - 22;
+                                return `<div class="network-node" style="position:absolute;left:${x}px;top:${y}px;">${node.icon}</div>`;
+                            }).join('')}
+                        </div>
+                    `;
+
+                case 'compare':
+                    return `
+                        <div class="compare-diagram">
+                            <div class="compare-box bad">
+                                <div class="compare-label">${visual.badLabel}</div>
+                                <div class="compare-text">${visual.bad}</div>
+                            </div>
+                            <div class="compare-arrow">→</div>
+                            <div class="compare-box good">
+                                <div class="compare-label">${visual.goodLabel}</div>
+                                <div class="compare-text">${visual.good}</div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'balance':
+                    return `
+                        <div class="balance-diagram">
+                            <div class="balance-scale">
+                                <div class="balance-top">
+                                    <div class="balance-pan ${visual.left.level}">
+                                        <div>${visual.left.label}</div>
+                                        <small>${visual.left.desc}</small>
+                                    </div>
+                                    <div class="balance-pan ${visual.right.level}">
+                                        <div>${visual.right.label}</div>
+                                        <small>${visual.right.desc}</small>
+                                    </div>
+                                </div>
+                                <div class="balance-stand"></div>
+                                <div class="balance-base"></div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'path':
+                    return `
+                        <div class="mind-path">
+                            ${visual.nodes.map((node, i) => `
+                                <span class="node">${node}</span>
+                                ${i < visual.nodes.length - 1 ? '<span class="arrow">→</span>' : ''}
+                            `).join('')}
+                        </div>
+                    `;
+
+                default:
+                    return '';
+            }
+        }
+
+        // 关闭弹窗
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        // 点击遮罩关闭
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // ESC键关闭
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // 分类切换
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                renderCards(this.dataset.category);
+            });
+        });
+
+        // 初始化
+        renderCards();
+
+        // 樱花飘落动画
+        function createSakura() {
+            const container = document.getElementById('sakura-container');
+            const sakuraChars = ['❀', '✿', '❁', '✾', '💮', '🏵️', '🌸'];
+
+            for (let i = 0; i < 15; i++) {
+                const sakura = document.createElement('div');
+                sakura.className = 'sakura';
+                sakura.textContent = sakuraChars[Math.floor(Math.random() * sakuraChars.length)];
+                sakura.style.left = Math.random() * 100 + 'vw';
+                sakura.style.fontSize = (Math.random() * 15 + 12) + 'px';
+                sakura.style.animationDuration = (Math.random() * 8 + 8) + 's';
+                sakura.style.animationDelay = (Math.random() * 10) + 's';
+                container.appendChild(sakura);
+            }
+        }
+        createSakura();
+    </script>
+</body>
+</html>
