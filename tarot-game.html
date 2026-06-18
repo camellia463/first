@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>TY 塔罗 · 星月夜</title>
+<style>
+:root{
+--night0:#070B24;--night1:#0B1033;--night2:#0E1540;--night3:#111A44;--night4:#0A0E20;
+--star:#F5D56C;--star2:#E8C44A;--star3:#D4A832;--star4:#FFFAE8;
+--sw1:#476B96;--sw2:#5B7FAA;--sw3:#6B8FB8;--sw4:#7BA1C7;--sw5:#8BA2C8;--sw6:#97B5D2;--sw7:#A8C0DE;
+--sakura:#F2A3B9;--sakura2:#E8879D;--sakura3:#FAD4E0;
+--surf:#121A38;--cardbg:#151E40;--bdr:#222C52;--bdr2:#2E3A64;
+--t1:#E2E0EC;--t2:#B8B5CC;--t3:#7A779A;
+--font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:#0E1220;color:var(--t1);min-height:100vh;overflow-x:hidden}
+
+/* === SKY === */
+.sky-svg{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+@keyframes swirlRot{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes swirlRotR{from{transform:rotate(360deg)}to{transform:rotate(0deg)}}
+@keyframes starPulse{0%,100%{opacity:.6}50%{opacity:1}}
+@keyframes starPulse2{0%,100%{opacity:.4}33%{opacity:.9}66%{opacity:.55}}
+@keyframes moonBreathe{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:.95;transform:scale(1.04)}}
+@keyframes villageDrift{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}
+.sw0{animation:swirlRotR 50s linear infinite;transform-origin:380px 180px;opacity:.9}
+.sw1{animation:swirlRot 38s linear infinite;transform-origin:640px 120px;opacity:.8}
+.sw2{animation:swirlRotR 60s linear infinite;transform-origin:190px 330px;opacity:.75}
+.sw3{animation:swirlRot 44s linear infinite;transform-origin:710px 370px;opacity:.7}
+.sw4{animation:swirlRotR 52s linear infinite;transform-origin:290px 220px;opacity:.65}
+.st0{animation:starPulse 3.5s ease-in-out infinite}
+.st1{animation:starPulse2 5s ease-in-out infinite}
+.st2{animation:starPulse 4s ease-in-out infinite 1.2s}
+.st3{animation:starPulse2 6s ease-in-out infinite .7s}
+.st4{animation:starPulse 4.5s ease-in-out infinite 2s}
+.mn{animation:moonBreathe 8s ease-in-out infinite}
+.vlg{animation:villageDrift 30s ease-in-out infinite}
+/* Shooting stars - CSS based, actually moves */
+.shooting-star{position:fixed;pointer-events:none;z-index:0;height:4px;border-radius:2px;
+background:linear-gradient(90deg,transparent 0%,#FFFDF5 15%,#F5D56C 50%,transparent 100%);
+animation:shoot 5s ease-in infinite;opacity:0;box-shadow:0 0 14px 4px rgba(245,213,108,.6)}
+.shooting-star::after{content:'';position:absolute;right:0;top:50%;transform:translateY(-50%);
+width:8px;height:8px;background:#FFFDF5;border-radius:50%;box-shadow:0 0 20px 6px #F5D56C}
+.ss2{animation-duration:5.5s;animation-delay:.8s;height:3px;width:120px;top:15%}
+.ss3{animation-duration:4.8s;animation-delay:1.8s;height:5px;width:160px;top:22%}
+.ss4{animation-duration:6s;animation-delay:2.8s;height:3px;width:130px;top:5%}
+.ss5{animation-duration:5.2s;animation-delay:3.5s;height:4px;width:140px;top:18%}
+.ss6{animation-duration:5.8s;animation-delay:.3s;height:6px;width:180px;top:12%}
+.ss7{animation-duration:6.2s;animation-delay:4.2s;height:3px;width:110px;top:28%}
+@keyframes shoot{
+0%{left:-200px;opacity:0;width:80px}
+4%{opacity:1;width:160px}
+12%{left:110vw;opacity:.5;width:40px}
+13%{left:110vw;opacity:0;width:0}
+100%{left:110vw;opacity:0;width:0}
+}
+
+/* === SAKURA === */
+.petals{position:fixed;inset:0;pointer-events:none;z-index:2;display:none}
+.petals.on{display:block}
+.petal{position:absolute;animation:petalFall linear infinite}
+@keyframes petalFall{
+0%{transform:translate(0,0) rotate(0deg);opacity:0}
+3%{opacity:.8}
+80%{opacity:.4}
+100%{transform:translate(30px,100vh) rotate(360deg);opacity:0}
+}
+
+/* === PETAL BURST === */
+.petal-burst{position:fixed;pointer-events:none;z-index:100;animation:burst .9s ease-out forwards}
+@keyframes burst{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--bx),var(--by)) scale(.2)}}
+
+/* === APP === */
+.app{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:36px 20px 80px}
+h1{font-size:26px;font-weight:600;color:var(--star);text-align:center;letter-spacing:-.5px;margin-bottom:4px}
+.tagline{font-size:12px;color:var(--t3);text-align:center;letter-spacing:1.5px;margin-bottom:32px}
+
+/* Step indicator */
+.steps-row{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:36px}
+.step-dot{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--surf);border:2px solid var(--bdr2);color:var(--t3);font-size:13px;font-weight:600;transition:all .35s;position:relative}
+.step-dot.act{background:var(--star2);border-color:var(--star);color:#1A1A20;box-shadow:0 0 16px rgba(245,213,108,.25)}
+.step-dot.done{background:rgba(245,213,108,.12);border-color:var(--star3);color:var(--star)}
+.step-line{width:48px;height:2px;background:var(--bdr2);transition:all .35s}
+.step-line.done{background:var(--star3)}
+.step-label-row{display:flex;justify-content:center;gap:84px;margin-top:-28px;margin-bottom:28px}
+.step-label-row span{font-size:10px;color:var(--t3);width:36px;text-align:center;transition:.35s}
+.step-label-row span.act{color:var(--star);font-weight:500}
+
+/* Step panels */
+.step-panel{display:none;animation:fadeIn .4s ease}
+.step-panel.on{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.step-title{font-size:15px;font-weight:500;color:var(--t1);margin-bottom:16px;text-align:center}
+.step-sub{font-size:11px;color:var(--t3);text-align:center;margin-bottom:6px}
+
+/* Domain */
+.domains{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:18px}
+.dt{padding:6px 15px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--bdr2);background:var(--surf);color:var(--t2);transition:all .2s;user-select:none}
+.dt:hover{border-color:var(--sakura2);color:var(--sakura)}
+.dt.on{background:rgba(242,163,185,.12);border-color:var(--sakura);color:var(--sakura);font-weight:500}
+
+/* Question */
+.qbox{background:var(--surf);border:1px solid var(--bdr);border-radius:16px;padding:18px 22px;margin-bottom:14px}
+.qbox textarea{width:100%;background:var(--night1);border:1px solid var(--bdr2);border-radius:12px;color:var(--t1);font-size:13px;font-family:var(--font);padding:12px 14px;resize:none;outline:none;transition:border .2s;min-height:60px}
+.qbox textarea:focus{border-color:var(--sakura2)}
+.qbox textarea::placeholder{color:var(--t3)}
+.tog{display:flex;gap:10px;align-items:center;margin-top:10px;font-size:11px;color:var(--t2)}
+.tog-sw{position:relative;width:36px;height:20px;cursor:pointer}
+.tog-sw input{display:none}
+.tog-sl{position:absolute;inset:0;background:var(--bdr2);border-radius:10px;transition:.25s}
+.tog-sl::before{content:'';position:absolute;width:16px;height:16px;left:2px;top:2px;background:var(--t2);border-radius:50%;transition:.25s}
+input:checked+.tog-sl{background:var(--sakura)}
+input:checked+.tog-sl::before{transform:translateX(16px)}
+
+/* Spreads */
+.spreads{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:12px 0;max-height:400px;overflow-y:auto;padding-right:4px}
+.spreads::-webkit-scrollbar{width:4px}
+.spreads::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px}
+.sp{padding:10px 12px;border-radius:12px;border:1px solid var(--bdr2);background:var(--surf);cursor:pointer;transition:.2s;text-align:center}
+.sp:hover{border-color:var(--sw3)}
+.sp.on{border-color:var(--star);background:rgba(245,213,108,.06)}
+.sp .sn{font-size:12px;font-weight:500;color:var(--t1)}
+.sp .sm{font-size:10px;color:var(--t3);margin-top:1px}
+
+/* Buttons */
+.btn-row{text-align:center;margin:18px 0}
+#shuffleBtn{display:inline-flex;gap:8px;padding:13px 38px;background:var(--star2);border:none;border-radius:40px;color:#1A1A20;font-size:14px;font-weight:600;cursor:pointer;transition:.25s;font-family:var(--font)}
+#shuffleBtn:hover{background:var(--star);transform:translateY(-1px);box-shadow:0 4px 20px rgba(245,213,108,.3)}
+#shuffleBtn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* Nav */
+.nav-row{display:flex;justify-content:center;gap:12px;margin-top:18px}
+.nav-btn{padding:11px 28px;border-radius:40px;font-size:13px;font-weight:500;cursor:pointer;transition:.25s;font-family:var(--font);border:none}
+.nav-next{background:var(--star2);color:#1A1A20}
+.nav-next:hover{background:var(--star);transform:translateY(-1px);box-shadow:0 4px 20px rgba(245,213,108,.3)}
+.nav-back{background:var(--surf);border:1px solid var(--bdr2);color:var(--t2)}
+.nav-back:hover{border-color:var(--t3);color:var(--t1)}
+.nav-next:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* Step 4 Q&A */
+.qa-wrap{display:flex;flex-direction:column;gap:14px}
+.qa-list{display:flex;flex-direction:column;gap:12px;max-height:360px;overflow-y:auto;padding-right:4px}
+.qa-list::-webkit-scrollbar{width:4px}
+.qa-list::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px}
+.qa-q{font-size:12px;color:var(--star);background:rgba(245,213,108,.06);border-radius:12px 12px 4px 12px;padding:12px 16px;align-self:flex-end;max-width:85%;line-height:1.6;border:1px solid rgba(245,213,108,.1)}
+.qa-a{font-size:13px;line-height:1.9;background:var(--surf);border:1px solid var(--bdr2);border-radius:12px 12px 12px 4px;padding:16px 20px;align-self:flex-start;max-width:95%}
+.qa-a b{color:var(--sakura)}
+.qa-input-row{display:flex;gap:8px;margin-top:8px}
+.qa-input{flex:1;background:var(--night1);border:1px solid var(--bdr2);border-radius:24px;color:var(--t1);font-size:13px;font-family:var(--font);padding:12px 18px;outline:none;transition:border .2s}
+.qa-input:focus{border-color:var(--sakura2)}
+.qa-input::placeholder{color:var(--t3)}
+.qa-send{padding:11px 22px;border-radius:24px;font-size:13px;font-weight:500;cursor:pointer;transition:.25s;font-family:var(--font);border:none;background:var(--star2);color:#1A1A20;white-space:nowrap}
+.qa-send:hover{background:var(--star)}
+.qa-send:disabled{opacity:.35;cursor:not-allowed}
+.qa-empty{text-align:center;font-size:12px;color:var(--t3);padding:24px 0;line-height:1.8}
+.qa-minicards{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-bottom:8px}
+.qa-mc{font-size:10px;padding:3px 8px;border-radius:8px;background:var(--surf);border:1px solid var(--bdr2);color:var(--t2)}
+
+/* Pick area */
+.pick-area{display:none;margin:20px 0}
+.pick-area.on{display:block}
+.pick-hint{text-align:center;font-size:13px;color:var(--star);margin-bottom:8px}
+.pick-prog{text-align:center;font-size:11px;color:var(--t3);margin-bottom:16px}
+.cards-spread{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;perspective:1200px}
+.cards-spread.celtic{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:560px;margin:0 auto}
+.cards-spread.celtic .cs:nth-child(1){grid-column:2;grid-row:1}
+.cards-spread.celtic .cs:nth-child(2){grid-column:2;grid-row:2}
+.cards-spread.celtic .cs:nth-child(3){grid-column:3;grid-row:1}
+.cards-spread.celtic .cs:nth-child(4){grid-column:3;grid-row:2}
+.cards-spread.celtic .cs:nth-child(5){grid-column:1;grid-row:1/3}
+.cards-spread.celtic .cs:nth-child(6){grid-column:4;grid-row:1/3}
+.cards-spread.celtic .cs:nth-child(7){grid-column:1/3;grid-row:3}
+.cards-spread.celtic .cs:nth-child(8){grid-column:1/3;grid-row:4}
+.cards-spread.celtic .cs:nth-child(9){grid-column:3/5;grid-row:3}
+.cards-spread.celtic .cs:nth-child(10){grid-column:3/5;grid-row:4}
+
+/* Card */
+.cs{display:flex;flex-direction:column;align-items:center;gap:4px}
+.cw{width:106px;height:162px;position:relative;cursor:pointer;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.4,0,.2,1)}
+.cw:not(.fl):not(.pk):hover{transform:translateY(-5px)}
+.cw.fl{transform:rotateY(180deg)}
+.cw.pk{pointer-events:none}
+.cf{position:absolute;inset:0;border-radius:10px;backface-visibility:hidden;overflow:hidden}
+.cb{background:linear-gradient(150deg,#0D1130 0%,#111B3D 50%,#0A0E28 100%);border:2px solid var(--bdr2);display:flex;align-items:center;justify-content:center;position:relative;border-radius:10px;overflow:hidden}
+.cb .cbsvg{position:absolute;inset:0;pointer-events:none;border-radius:10px;width:100%;height:100%}
+.cb .cbn{position:absolute;bottom:14px;font-size:9px;color:rgba(245,213,108,.5);letter-spacing:1px;z-index:1;font-weight:500}
+.cfr{transform:rotateY(180deg);display:flex;flex-direction:column;padding:9px;background:linear-gradient(160deg,#151230 0%,#0E0C28 40%,#131035 100%);border:1.5px solid;box-shadow:0 2px 8px rgba(0,0,0,.2);position:relative;border-radius:10px;overflow:hidden;width:100%;height:100%}
+.cfr .cfbg{position:absolute;inset:0;pointer-events:none;border-radius:10px;width:100%;height:100%}
+.cfr .cft{position:relative;z-index:1;display:flex;flex-direction:column;height:100%}
+.cfr .pos{font-size:8px;font-weight:500;text-align:center;margin-bottom:2px;letter-spacing:.3px}
+.cfr .name{font-size:11px;font-weight:600;text-align:center;margin-bottom:1px;line-height:1.2}
+.cfr .en{font-size:7px;text-align:center;margin-bottom:3px;opacity:.65}
+.cfr .sym{text-align:center;font-size:16px;margin:3px 0;text-shadow:0 0 8px currentColor}
+.cfr .kw{font-size:8px;text-align:center;line-height:1.3;color:var(--t2);margin-top:auto}
+.cfr .badge{margin-top:4px;text-align:center;font-size:7px;padding:1px 7px;border-radius:8px;align-self:center;z-index:1}
+.pl{font-size:8px;color:var(--sakura);max-width:106px;text-align:center;line-height:1.2;word-break:break-all}
+
+/* Result */
+.result{display:none;margin-top:28px}
+.result.on{display:block}
+.ip{background:var(--surf);border:1px solid var(--bdr);border-radius:16px;overflow:hidden;margin-top:24px}
+.iph{background:rgba(242,163,185,.06);padding:14px 22px;border-bottom:1px solid var(--bdr2)}
+.iph h3{font-size:14px;font-weight:500;color:var(--sakura)}
+.ipb{padding:22px}
+.sec{margin-bottom:20px}.sec:last-child{margin-bottom:0}
+.sec h4{font-size:11px;font-weight:600;color:var(--sakura2);letter-spacing:1.5px;margin-bottom:10px;text-transform:uppercase}
+.narr{font-size:13px;line-height:2.1;background:rgba(245,213,108,.04);border-radius:12px;padding:18px 22px;margin-bottom:18px;border:1px solid var(--bdr2)}
+.obox{background:rgba(242,163,185,.06);border-left:3px solid var(--sakura);border-radius:8px;padding:12px 16px;margin:12px 0}
+.obox p{font-size:12px;line-height:1.8}
+.obox p+p{margin-top:8px}
+.abox{background:rgba(123,161,199,.06);border-left:3px solid var(--sw3);border-radius:8px;padding:12px 16px}
+.abox p{font-size:12px;line-height:1.8}
+.clist{display:flex;flex-direction:column;gap:10px}
+.ci{background:var(--night1);border-radius:12px;padding:12px 14px;border:1px solid var(--bdr2)}
+.ci .ct{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.ci .cnn{font-size:12px;font-weight:500}
+.ci .cpos{font-size:9px;color:var(--t3)}
+.ci .cd{font-size:11px;line-height:1.7;color:var(--t2)}
+
+/* History */
+.hist{margin-top:44px;padding-top:22px;border-top:1px solid var(--bdr2)}
+.hist h4{font-size:10px;color:var(--t3);letter-spacing:1px;margin-bottom:10px}
+.hg{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:6px}
+.hi{padding:8px;border-radius:8px;background:var(--surf);border:1px solid var(--bdr2);text-align:center;cursor:pointer;transition:.2s}
+.hi:hover{border-color:var(--sakura2)}
+.hi .hd{font-size:10px;margin-bottom:1px}
+.hi .ht{font-size:8px;color:var(--t3)}
+</style>
+</head>
+<body>
+
+<svg class="sky-svg" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="skybg" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#030618"/>
+<stop offset="8%" stop-color="#080D26"/>
+<stop offset="20%" stop-color="#0C1340"/>
+<stop offset="35%" stop-color="#162060"/>
+<stop offset="48%" stop-color="#1A1A68"/>
+<stop offset="58%" stop-color="#1E1660"/>
+<stop offset="70%" stop-color="#1A1848"/>
+<stop offset="82%" stop-color="#181E38"/>
+<stop offset="92%" stop-color="#141A2C"/>
+<stop offset="100%" stop-color="#0E1220"/>
+</linearGradient>
+<linearGradient id="skybg2" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0%" stop-color="#301C50" stop-opacity=".35"/>
+<stop offset="35%" stop-color="#1A1040" stop-opacity=".1"/>
+<stop offset="60%" stop-color="#0F1535" stop-opacity="0"/>
+<stop offset="80%" stop-color="#181030" stop-opacity=".25"/>
+<stop offset="100%" stop-color="#0A0A1C" stop-opacity=".5"/>
+</linearGradient>
+<linearGradient id="skybg3" x1="0" y1="0" x2="0" y2="1">
+<stop offset="70%" stop-color="transparent"/>
+<stop offset="100%" stop-color="#1A0A15" stop-opacity=".3"/>
+</linearGradient>
+<radialGradient id="sglow"><stop offset="0%" stop-color="#FFFDF5" stop-opacity="1"/><stop offset="18%" stop-color="#F5D56C" stop-opacity=".7"/><stop offset="100%" stop-color="#F5D56C" stop-opacity="0"/></radialGradient>
+<radialGradient id="sglow2"><stop offset="0%" stop-color="#FFFDF5" stop-opacity=".9"/><stop offset="30%" stop-color="#E8C44A" stop-opacity=".45"/><stop offset="100%" stop-color="#E8C44A" stop-opacity="0"/></radialGradient>
+<radialGradient id="moongl"><stop offset="0%" stop-color="#FFFDF5" stop-opacity=".9"/><stop offset="15%" stop-color="#F5D56C" stop-opacity=".45"/><stop offset="50%" stop-color="#F5D56C" stop-opacity=".06"/><stop offset="100%" stop-color="#F5D56C" stop-opacity="0"/></radialGradient>
+<linearGradient id="shootG1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FFFDF5" stop-opacity="1"/><stop offset="30%" stop-color="#F5D56C" stop-opacity=".8"/><stop offset="100%" stop-color="#F5D56C" stop-opacity="0"/></linearGradient>
+</defs>
+
+<rect width="800" height="900" fill="url(#skybg)"/>
+<rect width="800" height="900" fill="url(#skybg2)"/>
+<rect width="800" height="900" fill="url(#skybg3)"/>
+
+<g class="mn"><circle cx="65" cy="60" r="80" fill="url(#moongl)"/><circle cx="65" cy="60" r="22" fill="#FFFDF5" opacity=".5"/></g>
+
+<g class="st0"><circle cx="155" cy="48" r="32" fill="url(#sglow)"/><circle cx="155" cy="48" r="3.5" fill="#FFFDF5" opacity=".9"/></g>
+<g class="st1"><circle cx="280" cy="72" r="40" fill="url(#sglow)"/><circle cx="280" cy="72" r="4" fill="#FFFDF5" opacity=".95"/></g>
+<g class="st2"><circle cx="420" cy="42" r="36" fill="url(#sglow)"/><circle cx="420" cy="42" r="3.5" fill="#FFFDF5" opacity=".9"/></g>
+<g class="st3"><circle cx="560" cy="88" r="28" fill="url(#sglow2)"/><circle cx="560" cy="88" r="2.5" fill="#FFFDF5" opacity=".75"/></g>
+<g class="st4"><circle cx="700" cy="52" r="34" fill="url(#sglow2)"/><circle cx="700" cy="52" r="3" fill="#FFFDF5" opacity=".85"/></g>
+<g class="st1"><circle cx="195" cy="150" r="24" fill="url(#sglow2)"/><circle cx="195" cy="150" r="2" fill="#FFFDF5" opacity=".6"/></g>
+<g class="st2"><circle cx="615" cy="170" r="26" fill="url(#sglow2)"/><circle cx="615" cy="170" r="2" fill="#FFFDF5" opacity=".65"/></g>
+<g class="st0"><circle cx="345" cy="190" r="22" fill="url(#sglow2)"/><circle cx="345" cy="190" r="1.5" fill="#FFFDF5" opacity=".5"/></g>
+<g class="st3"><circle cx="100" cy="240" r="20" fill="url(#sglow2)"/><circle cx="100" cy="240" r="1.5" fill="#FFFDF5" opacity=".45"/></g>
+<g class="st4"><circle cx="735" cy="230" r="20" fill="url(#sglow2)"/><circle cx="735" cy="230" r="1.5" fill="#FFFDF5" opacity=".45"/></g>
+<g class="st1"><circle cx="480" cy="250" r="18" fill="url(#sglow2)"/><circle cx="480" cy="250" r="1" fill="#FFFDF5" opacity=".4"/></g>
+
+<g class="sw0">
+<path d="M300,170 C350,90 430,100 390,175 C350,250 260,235 310,160 C360,85 450,75 395,170" fill="none" stroke="var(--sw1)" stroke-width="8" stroke-linecap="round"/>
+<path d="M308,165 C358,85 438,95 398,170 C358,245 268,230 318,155 C368,80 458,70 403,165" fill="none" stroke="var(--sw2)" stroke-width="6.5" stroke-linecap="round"/>
+<path d="M316,160 C366,80 446,90 406,165 C366,240 276,225 326,150 C376,75 466,65 411,160" fill="none" stroke="var(--sw3)" stroke-width="5" stroke-linecap="round"/>
+<path d="M324,155 C374,75 454,85 414,160 C374,235 284,220 334,145 C384,70 474,60 419,155" fill="none" stroke="var(--sw4)" stroke-width="3.5" stroke-linecap="round"/>
+<path d="M332,150 C382,70 462,80 422,155 C382,230 292,215 342,140 C392,65 482,55 427,150" fill="none" stroke="var(--sw5)" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M340,145 C390,65 470,75 430,150 C390,225 300,210 350,135 C400,60 490,50 435,145" fill="none" stroke="var(--sw6)" stroke-width="1.8" stroke-linecap="round"/>
+</g>
+
+<g class="sw2">
+<path d="M140,295 C195,235 260,250 215,320 C170,390 100,365 150,290 C205,225 275,220 220,315" fill="none" stroke="var(--sw1)" stroke-width="6" stroke-linecap="round"/>
+<path d="M148,288 C203,228 268,243 223,313 C178,383 108,358 158,283 C213,218 283,213 228,308" fill="none" stroke="var(--sw2)" stroke-width="4.5" stroke-linecap="round"/>
+<path d="M156,281 C211,221 276,236 231,306 C186,376 116,351 166,276 C221,211 291,206 236,301" fill="none" stroke="var(--sw3)" stroke-width="3.5" stroke-linecap="round"/>
+<path d="M164,274 C219,214 284,229 239,299 C194,369 124,344 174,269 C229,204 299,199 244,294" fill="none" stroke="var(--sw4)" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M172,267 C227,207 292,222 247,292 C202,362 132,337 182,262 C237,197 307,192 252,287" fill="none" stroke="var(--sw5)" stroke-width="1.8" stroke-linecap="round"/>
+</g>
+
+<g class="sw1">
+<path d="M580,115 C650,50 740,70 675,140 C610,210 530,185 595,110 C660,35 760,50 685,135" fill="none" stroke="var(--sw1)" stroke-width="6.5" stroke-linecap="round"/>
+<path d="M588,108 C658,43 748,63 683,133 C618,203 538,178 603,103 C668,28 768,43 693,128" fill="none" stroke="var(--sw2)" stroke-width="5" stroke-linecap="round"/>
+<path d="M596,101 C666,36 756,56 691,126 C626,196 546,171 611,96 C676,21 776,36 701,121" fill="none" stroke="var(--sw3)" stroke-width="3.5" stroke-linecap="round"/>
+<path d="M604,94 C674,29 764,49 699,119 C634,189 554,164 619,89 C684,14 784,29 709,114" fill="none" stroke="var(--sw4)" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M612,87 C682,22 772,42 707,112 C642,182 562,157 627,82 C692,7 792,22 717,107" fill="none" stroke="var(--sw5)" stroke-width="1.5" stroke-linecap="round"/>
+</g>
+
+<g class="sw3">
+<path d="M640,360 C700,290 760,310 715,380 C670,450 600,430 645,355 C690,280 765,280 720,375" fill="none" stroke="var(--sw2)" stroke-width="5.5" stroke-linecap="round"/>
+<path d="M648,353 C708,283 768,303 723,373 C678,443 608,423 653,348 C698,273 773,273 728,368" fill="none" stroke="var(--sw3)" stroke-width="4" stroke-linecap="round"/>
+<path d="M656,346 C716,276 776,296 731,366 C686,436 616,416 661,341 C706,266 781,266 736,361" fill="none" stroke="var(--sw4)" stroke-width="2.8" stroke-linecap="round"/>
+<path d="M664,339 C724,269 784,289 739,359 C694,429 624,409 669,334 C714,259 789,259 744,354" fill="none" stroke="var(--sw5)" stroke-width="1.8" stroke-linecap="round"/>
+</g>
+
+<g class="sw4">
+<path d="M250,195 C285,148 330,160 300,215 C270,270 225,258 255,203 C285,148 335,145 305,210" fill="none" stroke="var(--sw3)" stroke-width="4.5" stroke-linecap="round"/>
+<path d="M258,188 C293,141 338,153 308,208 C278,263 233,251 263,196 C293,141 343,138 313,203" fill="none" stroke="var(--sw4)" stroke-width="3" stroke-linecap="round"/>
+<path d="M266,181 C301,134 346,146 316,201 C286,256 241,244 271,189 C301,134 351,131 321,196" fill="none" stroke="var(--sw5)" stroke-width="2" stroke-linecap="round"/>
+<path d="M520,275 C555,228 600,240 570,295 C540,350 495,338 525,283 C555,228 605,225 575,290" fill="none" stroke="var(--sw3)" stroke-width="4" stroke-linecap="round"/>
+<path d="M528,268 C563,221 608,233 578,288 C548,343 503,331 533,276 C563,221 613,218 583,283" fill="none" stroke="var(--sw4)" stroke-width="2.5" stroke-linecap="round"/>
+</g>
+
+<g class="vlg">
+<rect x="0" y="680" width="800" height="220" fill="#070A1A" opacity=".65"/>
+<polygon points="45,680 55,500 60,520 50,680" fill="#0B1025"/>
+<polygon points="175,680 190,420 195,445 180,680" fill="#0B1025"/>
+<polygon points="315,680 328,490 336,510 326,680" fill="#0B1025"/>
+<polygon points="455,680 470,440 475,465 460,680" fill="#0B1025"/>
+<polygon points="595,680 608,500 615,520 605,680" fill="#0B1025"/>
+<polygon points="735,680 750,430 755,455 740,680" fill="#0B1025"/>
+</g>
+</svg>
+
+<div class="shooting-star" style="top:8%"></div>
+<div class="shooting-star ss2"></div>
+<div class="shooting-star ss3"></div>
+<div class="shooting-star ss4"></div>
+<div class="shooting-star ss5"></div>
+<div class="shooting-star ss6"></div>
+<div class="shooting-star ss7"></div>
+
+<div class="petals"></div>
+
+<div class="app">
+<h1>TY 塔罗 · 星月夜</h1>
+<p class="tagline">78张牌 · 28种牌阵 · 翻你自己的命运</p>
+
+<div class="steps-row">
+<div class="step-dot act" id="sdot1">1</div><div class="step-line" id="sline1"></div>
+<div class="step-dot" id="sdot2">2</div><div class="step-line" id="sline2"></div>
+<div class="step-dot" id="sdot3">3</div><div class="step-line" id="sline3"></div>
+<div class="step-dot" id="sdot4">4</div>
+</div>
+
+<!-- STEP 1: 选择问题与牌阵 -->
+<div class="step-panel on" id="step1">
+<div class="step-title">你想问什么？</div>
+<div class="step-sub">选择领域 · 写下疑问 · 选定牌阵</div>
+
+<div class="domains" id="domains"></div>
+
+<div class="qbox">
+<textarea id="q" placeholder="写下你想问的，不说也行——牌会给你此刻最需要的指引…" rows="2"></textarea>
+<div class="tog"><span style="cursor:pointer;user-select:none;display:flex;gap:8px;align-items:center" onclick="toggleRev()"><label class="tog-sw"><input type="checkbox" id="revChk"><span class="tog-sl"></span></label>包含逆位（156张）</span></div>
+</div>
+
+<div class="spreads" id="spreads"></div>
+
+<div class="nav-row"><button class="nav-btn nav-next" onclick="goStep2()">开始洗牌 ✦</button></div>
+</div>
+
+<!-- STEP 2: 洗牌 · 摊开 · 翻牌 -->
+<div class="step-panel" id="step2">
+<div class="step-title">摊开牌面，亲手翻开每一张</div>
+<div class="btn-row"><button id="shuffleBtn">✦ 洗牌 · 摊开牌面</button></div>
+<div class="pick-area" id="pickArea"></div>
+<div class="nav-row" style="margin-top:24px">
+<button class="nav-btn nav-back" onclick="goStep1()">← 换问题</button>
+</div>
+</div>
+
+<!-- STEP 3: 解读 -->
+<div class="step-panel" id="step3">
+<div class="result on" id="result"><div class="ip" id="ip"></div></div>
+<div class="nav-row">
+<button class="nav-btn nav-back" onclick="goStep1()">重新占卜</button>
+<button class="nav-btn nav-next" onclick="goStep4()">深度追问 →</button>
+</div>
+<div class="hist" style="margin-top:36px"><h4>历史占卜</h4><div class="hg" id="histGrid"></div></div>
+</div>
+
+<!-- STEP 4: 精准追问 -->
+<div class="step-panel" id="step4">
+<div class="step-title">追问牌面 · 精准解读</div>
+<div class="step-sub">基于刚才翻开的牌，问你想知道的任何事</div>
+<div class="qa-minicards" id="qaMiniCards"></div>
+<div class="qa-wrap">
+<div class="qa-list" id="qaList">
+<div class="qa-empty">💬 每张牌都在等你提问——<br>比如"为什么会出现这张牌？""这几张牌之间有什么联系？""我应该怎么做？"</div>
+</div>
+<div class="qa-input-row">
+<input class="qa-input" id="qaInput" placeholder="追问：为什么是这样的结果？…" onkeydown="if(event.key==='Enter')askQA()">
+<button class="qa-send" onclick="askQA()">提问</button>
+</div>
+</div>
+<div class="nav-row">
+<button class="nav-btn nav-back" onclick="goStep3()">← 返回解读</button>
+<button class="nav-btn nav-back" onclick="goStep2()">🔄 重新抽牌</button>
+</div>
+</div>
+</div>
+
+<script>
+const D=[
+{cn:'愚者',en:'The Fool',wx:'风',s:'✦',kw:'开始·冒险·自由·天真',d:'一场没有地图的旅程。愚者不问结果，只问愿不愿意迈出第一步。'},
+{cn:'魔术师',en:'The Magician',wx:'风',s:'◆',kw:'创造力·意志·技能·显化',d:'四大元素皆在手中。你要的东西，你已有能力让它发生。'},
+{cn:'女祭司',en:'The High Priestess',wx:'水',s:'☽',kw:'直觉·潜意识·等待·智慧',d:'答案不在外面——在你最安静的深处。先学会听，再学会说。'},
+{cn:'皇后',en:'The Empress',wx:'土',s:'♁',kw:'丰饶·滋养·感官·创造',d:'大地回春。让自己被滋养，也去滋养值得的人。'},
+{cn:'皇帝',en:'The Emperor',wx:'火',s:'♔',kw:'权威·秩序·稳定·掌控',d:'你得坐下来制定规则。混乱不会自动变整齐。'},
+{cn:'教皇',en:'The Hierophant',wx:'土',s:'†',kw:'传统·教导·信仰·指引',d:'有些路前人走过。站在巨人的肩膀上。'},
+{cn:'恋人',en:'The Lovers',wx:'风',s:'♥',kw:'爱情·选择·价值·和谐',d:'你选择谁，就是选择成为什么样的人。'},
+{cn:'战车',en:'The Chariot',wx:'水',s:'⚔',kw:'胜利·决心·前进·征服',d:'缰绳在你手里。集中注意力，冲过去。'},
+{cn:'力量',en:'Strength',wx:'火',s:'♌',kw:'勇气·耐心·温柔·驯服',d:'真正的力量不是征服狮子——是它愿意把头放在你手里。'},
+{cn:'隐士',en:'The Hermit',wx:'土',s:'☉',kw:'内省·独处·真理·智慧',d:'热闹散尽之后，才是你真正听到自己的时候。'},
+{cn:'命运之轮',en:'Wheel of Fortune',wx:'火',s:'☸',kw:'命运·周期·机遇·转折',d:'轮子在转。上面还是下面——不重要，它总会再转。'},
+{cn:'正义',en:'Justice',wx:'风',s:'⚖',kw:'公平·真相·因果·决策',d:'你做过的事会找到你。秤从不骗人。'},
+{cn:'倒吊人',en:'The Hanged Man',wx:'水',s:'⏸',kw:'牺牲·换视角·等待·顿悟',d:'有些事必须停下来，才能看清楚。'},
+{cn:'死神',en:'Death',wx:'水',s:'💀',kw:'结束·转变·重生·放手',d:'该腐烂的让它腐烂。不腾空，种不了新的。'},
+{cn:'节制',en:'Temperance',wx:'火',s:'∞',kw:'平衡·调和·耐心·融合',d:'把热水和冷水倒在一起，调出刚好的温度。'},
+{cn:'恶魔',en:'The Devil',wx:'土',s:'⛓',kw:'束缚·执念·欲望·阴影',d:'锁链是松的——你随时可以走。但你没走。'},
+{cn:'高塔',en:'The Tower',wx:'火',s:'⚡',kw:'崩塌·觉醒·真相·解放',d:'假的东西会塌。痛是真的。但塌完之后，你看到天空了。'},
+{cn:'星星',en:'The Star',wx:'风',s:'✧',kw:'希望·信念·疗愈·灵感',d:'风暴过后——天上还有星星。你还活着。'},
+{cn:'月亮',en:'The Moon',wx:'水',s:'☾',kw:'幻觉·恐惧·潜意识·不安',d:'你现在看到的不是全貌。先别急着做决定。'},
+{cn:'太阳',en:'The Sun',wx:'火',s:'☀',kw:'快乐·成功·活力·真相',d:'阳光打在脸上——一切明朗。'},
+{cn:'审判',en:'Judgement',wx:'火',s:'♫',kw:'觉醒·召唤·清算·新生',d:'号角吹响。你终于听清了自己内心深处的声音。'},
+{cn:'世界',en:'The World',wx:'土',s:'⊕',kw:'完成·整合·成就·圆满',d:'一圈走完。你已经不是出发时的那个人。'},
+];
+const SUITS=[
+{nm:'圣杯',en:'Cups',w:'水',c:'#7BA1C7',bg:'rgba(123,161,199,.1)',tc:'#A3C4E8',
+r:{'王牌':{k:'情感涌动·爱开始',d:'源头涌出的水——最纯粹的爱意。'},'2':{k:'吸引·平衡',d:'水互相倒流——情感的共鸣。'},'3':{k:'庆祝·友情',d:'属于"我们"的快乐。'},'4':{k:'倦怠·停滞',d:'拥有的不想要，想要的没看到。'},'5':{k:'失落·悲伤',d:'三杯倒了——身后还有两杯立着。'},'6':{k:'怀旧·纯真',d:'回到最简单的快乐。'},'7':{k:'幻想·选择过多',d:'不是每个梦都该追。'},'8':{k:'离开·寻找',d:'有些东西，再多也不够。'},'9':{k:'愿望成真',d:'你想要的，都已经有了。'},'10':{k:'圆满·幸福',d:'彩虹之下——情感的终点站。'},
+'侍从':{k:'消息·苗头',d:'一段感情的萌芽。'},'骑士':{k:'追求·奔赴',d:'白马骑士——为爱出征。'},'皇后':{k:'智慧·同理',d:'情感世界的女王。'},'国王':{k:'掌控·成熟',d:'情感服务于他，而非控制他。'}}},
+{nm:'权杖',en:'Wands',w:'火',c:'#D4A832',bg:'rgba(212,168,50,.1)',tc:'#E8C44A',
+r:{'王牌':{k:'冒险·行动',d:'"开始做"的信号。'},'2':{k:'规划·展望',d:'有方向了，还没迈步。'},'3':{k:'初步成功',d:'投出去的东西，正在回来。'},'4':{k:'稳定·庆祝',d:'权杖搭成拱门——庆祝的时刻。'},'5':{k:'竞争·冲突',d:'竞技场，不是战场。'},'6':{k:'胜利·凯旋',d:'骑着白马凯旋——你的moment。'},'7':{k:'坚守·不退',d:'你在守护自己的地盘。'},'8':{k:'快速·加速',d:'事情在高速运转。'},'9':{k:'坚持·极限',d:'缠着绷带但依然站着。'},'10':{k:'负担·过重',d:'你扛得太多了。'},
+'侍从':{k:'新点子·学习',d:'火花刚被点燃。'},'骑士':{k:'冲动·热情',d:'有时候太快了。'},'皇后':{k:'自信·光芒',d:'她是创造力本身。'},'国王':{k:'远见·掌控',d:'他知道自己要去哪。'}}},
+{nm:'宝剑',en:'Swords',w:'风',c:'#E8879D',bg:'rgba(232,135,157,.1)',tc:'#F2A3B9',
+r:{'王牌':{k:'清晰·决断',d:'思想的力量——可切，也可指明方向。'},'2':{k:'两难·僵局',d:'蒙眼持两剑——你看不清。'},'3':{k:'心碎·伤痛',d:'三剑穿心——但伤口会愈合。'},'4':{k:'休息·充电',d:'战斗暂停，你需要恢复。'},'5':{k:'冲突·失败',d:'赢家冷笑，输家收拾。'},'6':{k:'离开·向前',d:'有些地方不适合再待了。'},'7':{k:'策略·聪明',d:'你在用聪明的方式解决问题。'},'8':{k:'被困·自限',d:'八剑围住——但你没有被真正绑住。'},'9':{k:'焦虑·噩梦',d:'你怕的事大多数都不会发生。'},'10':{k:'终结·触底',d:'最低点。好消息：只剩上坡。'},
+'侍从':{k:'好奇·观察',d:'学习使用锋利的工具。'},'骑士':{k:'冲锋·尖锐',d:'来得太快，有时伤及无辜。'},'皇后':{k:'判断·智慧',d:'她用思想统治。'},'国王':{k:'理性·公正',d:'冷，但正确。'}}},
+{nm:'星币',en:'Pentacles',w:'土',c:'#8BB58E',bg:'rgba(139,181,142,.1)',tc:'#A8CCA8',
+r:{'王牌':{k:'财富·机会',d:'机会就在眼前——但你要伸手去拿。'},'2':{k:'平衡·多任务',d:'两枚星币在指尖旋转。'},'3':{k:'协作·精进',d:'你的手艺被看见了。'},'4':{k:'守财·控制',d:'守得太多，连用都不敢用。'},'5':{k:'匮乏·求助',d:'你有需要，却不敢开口。'},'6':{k:'给予·分享',d:'真正的富足是给予的能力。'},'7':{k:'耐心·等待',d:'你投下去的东西需要时间。'},'8':{k:'精进·工匠',d:'反复打磨——你在练手艺。'},'9':{k:'独立·自足',d:'你靠自己的手建了这一切。'},'10':{k:'传承·繁荣',d:'这是你留给世界的东西。'},
+'侍从':{k:'学习·务实',d:'学习现实的规则。'},'骑士':{k:'稳步·可靠',d:'不快，但方向是对的。'},'皇后':{k:'务实·丰盛',d:'她知道怎么让钱生钱。'},'国王':{k:'巅峰·安全',d:'物质世界的王者。'}}},
+];
+
+function buildDeck(){
+let d=[];D.forEach(m=>d.push({...m,arc:'大',suit:null,cn2:m.cn,en2:m.en,c:'#E8C44A',bg:'rgba(232,196,74,.08)',tc:'#F5D56C'}));
+SUITS.forEach(s=>{Object.entries(s.r).forEach(([rk,v])=>{
+let cn=`${s.nm}${rk}`,en;if(rk==='王牌')en=`Ace of ${s.en}`;
+else if(['侍从','骑士','皇后','国王'].includes(rk)){let rm={侍从:'Page',骑士:'Knight',皇后:'Queen',国王:'King'};en=`${rm[rk]} of ${s.en}`;}
+else en=`${rk} of ${s.en}`;
+d.push({cn,en,arc:'小',suit:s,cn2:cn,en2:en,kw:v.k,d:v.d,wx:s.w,s:s.w==='水'?'∼':s.w==='火'?'△':s.w==='风'?'◇':'○',c:s.c,bg:s.bg,tc:s.tc});
+});});return d;
+}
+let DECK=buildDeck();
+
+const SPREADS=[
+// === 通用 (全部领域) ===
+{id:'single',name:'单张牌',n:1,meta:'快速指引',icon:'🌙',p:['当下的指引'],doms:['general','love','career','wealth','health','spirit','decision']},
+{id:'three',name:'三牌阵',n:3,meta:'过去·现在·未来',icon:'⏳',p:['过去的影响','当下的状态','未来的走向'],doms:['general','love','career','wealth','health','spirit','decision']},
+{id:'celtic',name:'凯尔特十字',n:10,meta:'史诗级全景',icon:'🏰',p:['核心问题','交叉因素','意识根基','过去根源','潜在可能','近期未来','你的态度','环境影响','希望恐惧','最终结果'],doms:['general','love','career','wealth','health','spirit','decision']},
+{id:'seasons',name:'四季轮转',n:4,meta:'春生·夏长·秋收·冬藏',icon:'🍂',p:['春：萌芽与根基','夏：发展与高峰','秋：收获与反思','冬：沉淀与新机'],doms:['general','love','career','wealth']},
+{id:'starcompass',name:'星图罗盘',n:9,meta:'3×3九宫天象',icon:'🧭',p:['根基层','挑战层','天赋层','过去因','核心轴','未来果','环境场','希望星','归宿点'],doms:['general','love','career','spirit']},
+{id:'socrates',name:'苏格拉底',n:3,meta:'困境·资源·出路',icon:'🏛',p:['你所处的困境','你拥有的资源','前进的道路'],doms:['general','career','wealth','health','decision']},
+
+// === 爱情专属 ===
+{id:'cross',name:'恋人十字',n:5,meta:'深度关系分析',icon:'🌸',p:['你的内心','对方状态','关系现状','障碍挑战','未来走向'],doms:['love']},
+{id:'mirror',name:'关系镜像',n:4,meta:'你与TA的两面镜',icon:'🪞',p:['你的内在状态','对方的内在状态','关系的本质面貌','共同前行的方向'],doms:['love']},
+{id:'lovemap',name:'桃花运势',n:3,meta:'机遇·阻碍·结果',icon:'💫',p:['桃花出现的形式','阻碍与准备','最终走向'],doms:['love']},
+{id:'truelove',name:'真爱之路',n:5,meta:'从相遇到灵魂契约',icon:'💞',p:['自我准备','相遇时机','对方特质','关系挑战','灵魂契约'],doms:['love']},
+{id:'healheart',name:'分手疗愈',n:4,meta:'放下·愈合·新生',icon:'🕊',p:['伤痛根源','需要放手的','正在愈合的','新的可能'],doms:['love']},
+{id:'soulmate',name:'灵魂伴侣',n:6,meta:'查是否对的人',icon:'🔮',p:['你的灵魂特质','对方灵魂特质','前世业力','今生课题','契合指数','共同使命'],doms:['love']},
+
+// === 事业专属 ===
+{id:'career',name:'事业财阵',n:5,meta:'工作与财富',icon:'⚡',p:['当前处境','你的能力','外部机会','潜在风险','发展方向'],doms:['career']},
+{id:'breakout',name:'职场突破',n:4,meta:'现状·瓶颈·突破点',icon:'🚀',p:['当前职场状态','瓶颈所在','突破的关键','行动后的结果'],doms:['career']},
+{id:'startup',name:'创业之路',n:5,meta:'从想法到落地',icon:'💡',p:['你的想法根基','所需资源','市场环境','潜在风险','最终结果'],doms:['career']},
+{id:'teamwork',name:'团队协作',n:4,meta:'你的角色与团队',icon:'🤝',p:['你在团队中的角色','团队整体状态','沟通摩擦点','共同目标'],doms:['career']},
+{id:'promotion',name:'晋升之梯',n:4,meta:'机会·准备·竞争',icon:'📈',p:['晋升机会','你需要展示的','竞争者态势','最终走向'],doms:['career']},
+
+// === 财运专属 ===
+{id:'wealthcode',name:'财富密码',n:4,meta:'来源·漏洞·方向',icon:'💎',p:['主要收入来源','支出漏洞','投资方向','财务自由之路'],doms:['wealth']},
+{id:'moneyflow',name:'金钱关系',n:3,meta:'你和钱的关系',icon:'🪙',p:['你对金钱的态度','金钱现在的流向','改善财富的行动'],doms:['wealth']},
+{id:'sidehustle',name:'偏财运势',n:4,meta:'时机·渠道·风险',icon:'🍀',p:['偏财时机','渠道方向','隐藏风险','预期收益'],doms:['wealth']},
+{id:'abundance',name:'丰盛之杯',n:5,meta:'财富全局观',icon:'🌟',p:['你拥有的资源','匮乏感的根源','释放的方式','流入的通道','一年后的你'],doms:['wealth']},
+
+// === 健康专属 ===
+{id:'bodybalance',name:'身心平衡',n:4,meta:'身体·情绪·压力',icon:'🌿',p:['身体发出的信号','情绪积压之处','压力主要来源','疗愈之道'],doms:['health']},
+{id:'energyscan',name:'能量扫描',n:5,meta:'全身气场检测',icon:'✨',p:['头部与思维','心肺与情感','腹部与直觉','四肢与行动','整体气场'],doms:['health']},
+{id:'sleepheal',name:'安眠之道',n:3,meta:'失眠·修复·重生',icon:'🌙',p:['失眠的根源','需要修复的','重生后的状态'],doms:['health']},
+
+// === 灵性专属 ===
+{id:'hexagram',name:'六芒星阵',n:7,meta:'灵性深度洞察',icon:'⭐',p:['核心问题','内在根源','外在表现','意识层面','潜意识','希望恐惧','最终启示'],doms:['spirit']},
+{id:'soulmission',name:'灵魂使命',n:5,meta:'天赋·召唤·终极目标',icon:'🌌',p:['你的天赋','今生的阻碍','灵魂的召唤','内在导师','终极目标'],doms:['spirit']},
+{id:'pastlife',name:'前世回响',n:4,meta:'业力·遗留·化解',icon:'🕯',p:['前世留下的印记','今生的重复模式','需要化解的业力','释放后的礼物'],doms:['spirit']},
+
+// === 抉择专属 ===
+{id:'decision',name:'二择一',n:5,meta:'面临选择',icon:'⚖',p:['你的现状','选项A走向','选项A结果','选项B走向','选项B结果'],doms:['decision']},
+{id:'crossroad',name:'十字路口',n:4,meta:'直觉 vs 理性',icon:'🧩',p:['选项A的全貌','选项B的全貌','你的直觉指向','宇宙给你的建议'],doms:['decision']},
+{id:'horseshoe',name:'七牌马蹄',n:7,meta:'全景运势',icon:'🐴',p:['过去','现在','隐藏影响','障碍','环境态度','建议行动','最终结果'],doms:['general','career','wealth','decision']},
+];
+const DOMS=['general','love','career','wealth','health','spirit','decision'];
+const DOMN={general:'综合',love:'爱情',career:'事业',wealth:'财运',health:'健康',spirit:'灵性',decision:'抉择'};
+const DOMDFT={general:'celtic',love:'cross',career:'career',wealth:'wealthcode',health:'bodybalance',spirit:'hexagram',decision:'decision'};
+
+let domain='general',spread=DOMDFT['general'],useRev=true,pool=[],pCards=[],pOrder=[],rem=0,hist=[],qText='';
+
+// Init petal divs
+(function(){
+const pc=document.querySelector('.petals');if(pc){
+const emojis=['🌸','🌸','🌸','💮','🏵️','🌸','🌸'];
+for(let i=0;i<24;i++){
+const p=document.createElement('div');p.className='petal';
+p.style.left=Math.random()*100+'%';p.style.top=(-10-Math.random()*30)+'px';
+p.style.animationDuration=(8+Math.random()*10)+'s';p.style.animationDelay=Math.random()*8+'s';
+p.style.fontSize=(10+Math.random()*14)+'px';p.style.opacity=.3+Math.random()*.3;
+p.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+pc.appendChild(p);
+}
+}
+})();
+
+function domTags(){
+document.getElementById('domains').innerHTML=DOMS.map(d=>`<span class="dt${d===domain?' on':''}" data-d="${d}" onclick="setDom('${d}')">${DOMN[d]==='综合'?'🌙':DOMN[d]==='爱情'?'🌸':DOMN[d]==='事业'?'⚡':DOMN[d]==='财运'?'⭐':DOMN[d]==='健康'?'🌿':DOMN[d]==='灵性'?'🌌':'⚖'} ${DOMN[d]}</span>`).join('');
+}
+function setDom(d){domain=d;spread=DOMDFT[d]||'celtic';spreadBtns();domTags();}
+function spreadBtns(){
+const ds=SPREADS.filter(s=>s.doms.includes(domain));
+document.getElementById('spreads').innerHTML=ds.map(s=>`<div class="sp${s.id===spread?' on':''}" onclick="setSp('${s.id}')"><div class="sn">${s.icon} ${s.name}</div><div class="sm">${s.n}张·${s.meta}</div></div>`).join('');
+}
+function setSp(s){spread=s;spreadBtns();}
+function toggleRev(){useRev=!useRev;}
+
+function burst(x,y,n=8){
+for(let i=0;i<n;i++){
+const p=document.createElement('div');p.className='petal-burst';
+p.style.left=x+'px';p.style.top=y+'px';
+p.style.fontSize=(10+Math.random()*10)+'px';
+p.style.setProperty('--bx',(Math.random()*100-50)+'px');
+p.style.setProperty('--by',(-40-Math.random()*60)+'px');
+p.textContent='🌸';document.body.appendChild(p);
+setTimeout(()=>p.remove(),1000);
+}
+}
+
+function shuffleDeck(arr){
+let a=[...arr];for(let pass=0;pass<3;pass++){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}}
+// random cut like physical deck
+const cut=Math.floor(Math.random()*a.length*0.6)+Math.floor(a.length*0.2);
+a=[...a.slice(cut),...a.slice(0,cut)];
+return a;
+}
+function startPick(){
+const s=SPREADS.find(x=>x.id===spread);qText=document.getElementById('q').value.trim();
+let d=[...DECK];if(useRev)d=[...d,...DECK.map(c=>({...c,rev:true}))];
+d=shuffleDeck(d);
+pool=d;pCards=new Array(s.n).fill(null);pOrder=[];rem=s.n;
+document.getElementById('result').classList.remove('on');
+const pa=document.getElementById('pickArea');pa.classList.add('on');
+pa.innerHTML=`<div class="pick-hint">🌸 请点击牌面——共${s.n}张，一张一张亲手翻开</div><div class="pick-prog" id="pickProg">还剩 ${s.n} 张</div><div class="cards-spread${s.id==='celtic'?' celtic':''}" id="cardsSpread"></div>`;
+renderPick(s);
+document.getElementById('shuffleBtn').disabled=true;document.getElementById('shuffleBtn').textContent='挑选中…';
+}
+
+function cardFaceSVG(c,i){
+let cl=c.c||'#E8C44A',ac='#F5D56C',uid='fc'+i+'_'+(c.cn2||c.cn||'').replace(/[^a-zA-Z0-9]/g,'');
+let stars='',path='',geo='';
+let seed=(i+1)*137;let rng=(n)=>{seed=(seed*16807+0)%2147483647;return (seed%100)/100;};
+// Scattered stars - more and brighter
+for(let j=0;j<16;j++){
+let sx=4+rng()*80,sy=4+rng()*136,sz=.6+rng()*2.4;
+stars+=`<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="${sz.toFixed(1)}" fill="${j<4?ac:cl}" opacity="${(.25+rng()*.5).toFixed(2)}"/>`;
+}
+// Central swirl art
+let cx=44,cy=50;
+path+=`<path d="M${cx-22},${cy-4} Q${cx-6},${cy-22} ${cx+6},${cy-10} Q${cx+20},${cy+4} ${cx+2},${cy+18} Q${cx-16},${cy+24} ${cx-24},${cy+2}" fill="none" stroke="${ac}" stroke-width="1.3" opacity=".35"/>`;
+path+=`<path d="M${cx-14},${cy+6} Q${cx-2},${cy-12} ${cx+12},${cy+2} Q${cx+2},${cy+14} ${cx-10},${cy+16}" fill="none" stroke="${cl}" stroke-width=".8" opacity=".28"/>`;
+path+=`<path d="M${cx-8},${cy-2} Q${cx+4},${cy-8} ${cx+6},${cy+4} Q${cx},${cy+10} ${cx-6},${cy+8}" fill="none" stroke="${ac}" stroke-width=".5" opacity=".18"/>`;
+// Elemental motif
+let w=c.wx||'';
+if(w==='火'){for(let j=0;j<3;j++){let ax=32+j*12;geo+=`<path d="M${ax},68 Q${ax-2},58 ${ax},50 Q${ax+2},58 ${ax},68" fill="none" stroke="${cl}" stroke-width=".6" opacity=".2"/>`;}}
+if(w==='水'){for(let j=0;j<3;j++){let ay=60+j*8;geo+=`<path d="M28,${ay} Q36,${ay-4} 44,${ay} Q52,${ay+4} 60,${ay}" fill="none" stroke="${cl}" stroke-width=".5" opacity=".18"/>`;}}
+if(w==='风'){for(let j=0;j<3;j++){let ay=58+j*10;geo+=`<path d="M28,${ay} Q36,${ay-5} 44,${ay+2} Q52,${ay-3} 60,${ay}" fill="none" stroke="${cl}" stroke-width=".5" opacity=".18"/>`;}}
+if(w==='土'){for(let j=0;j<3;j++){let ax=30+j*12;geo+=`<rect x="${ax}" y="58" width="8" height="6" rx="1" fill="none" stroke="${cl}" stroke-width=".5" opacity=".15"/>`;}}
+return `<svg class="cfbg" viewBox="0 0 88 144" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+<defs>
+<radialGradient id="g_${uid}"><stop offset="0%" stop-color="${ac}" stop-opacity=".22"/><stop offset="40%" stop-color="${cl}" stop-opacity=".1"/><stop offset="100%" stop-color="${cl}" stop-opacity="0"/></radialGradient>
+<linearGradient id="gb_${uid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${ac}" stop-opacity=".04"/><stop offset="100%" stop-color="${cl}" stop-opacity=".12"/></linearGradient>
+</defs>
+<rect width="88" height="144" fill="url(#gb_${uid})"/>
+<rect width="88" height="144" fill="url(#g_${uid})"/>
+<rect x="2" y="2" width="84" height="140" rx="5" fill="none" stroke="${ac}" stroke-width="1.2" opacity=".5" stroke-dasharray="3 4"/>
+<rect x="5" y="5" width="78" height="134" rx="4" fill="none" stroke="${cl}" stroke-width=".7" opacity=".32"/>
+<circle cx="4" cy="4" r="3" fill="${ac}" opacity=".7"/><circle cx="84" cy="4" r="3" fill="${ac}" opacity=".7"/>
+<circle cx="4" cy="140" r="3" fill="${ac}" opacity=".7"/><circle cx="84" cy="140" r="3" fill="${ac}" opacity=".7"/>
+<ellipse cx="44" cy="46" rx="30" ry="20" fill="url(#g_${uid})"/>
+${path}${geo}${stars}
+<circle cx="44" cy="48" r="17" fill="none" stroke="${ac}" stroke-width="1" opacity=".4"/>
+<circle cx="44" cy="48" r="13" fill="none" stroke="${cl}" stroke-width=".7" opacity=".25" stroke-dasharray="2 3"/>
+<circle cx="44" cy="48" r="6" fill="${ac}" opacity=".2"/>
+</svg>`;
+}
+function cardBackSVG(i){
+let seed=i*137;let rng=(n)=>{seed=(seed*16807+0)%2147483647;return (seed%100)/100;};
+let uid='cb'+i,cl1='#F5D56C',cl2='#E8C44A',cl3='#FFFDF5',cl4='#7BA1C7',cl5='#5B7FAA';
+let lines=[],cx=44,cy=72;
+// Dense spiral vortex - many thin arcs
+for(let layer=0;layer<8;layer++){
+let lr=8+layer*6,lt=3.5+layer*.4,lo=.06+layer*.025,lw=.3+layer*.15,cl=layer%2?cl2:cl1;
+lines.push(`<path d="M${cx},${cy} ${Array.from({length:40},(_,t)=>{
+let tt=t/39*lt*Math.PI*2,rr=lr+tt*2.5,th=tt+layer*.7;
+return`L${(cx+Math.cos(th)*rr).toFixed(1)},${(cy+Math.sin(th)*rr*1.3).toFixed(1)}`}).join(' ')}" fill="none" stroke="${cl}" stroke-width="${lw}" opacity="${lo.toFixed(2)}" stroke-linecap="round"/>`);
+}
+// Intersecting angular lines - geometric abstract
+for(let j=0;j<14;j++){
+let x1=2+rng()*84,y1=2+rng()*140,x2=2+rng()*84,y2=2+rng()*140;
+let cl=j%3?cl5:cl4;
+lines.push(`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${cl}" stroke-width="${(.4+rng()*.8).toFixed(1)}" opacity="${(.08+rng()*.18).toFixed(2)}"/>`);
+}
+// Concentric rings
+for(let r=12;r<=56;r+=8){
+lines.push(`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${r%16?cl2:cl1}" stroke-width="${r<32?.5:.3}" opacity="${(.04+r/300).toFixed(2)}" stroke-dasharray="${r%12?2:4} ${r%10?3:2}"/>`);
+}
+// Horizontal/vertical wave lines
+let waves='';
+for(let row=0;row<6;row++){
+let by=16+row*22,amp=3+rng()*5,freq=.06+rng()*.08;
+waves+=`M2,${by} `;
+for(let x=2;x<=86;x+=2)waves+=`L${x},${(by+Math.sin(x*freq+row*2)*amp).toFixed(1)} `;
+}
+lines.push(`<path d="${waves}" fill="none" stroke="${cl4}" stroke-width=".4" opacity=".15"/>`);
+// Few sparse bright dots (not stars, just accents)
+let dots='';
+for(let j=0;j<8;j++){
+dots+=`<circle cx="${(4+rng()*80).toFixed(1)}" cy="${(4+rng()*136).toFixed(1)}" r="${(.3+rng()*1).toFixed(1)}" fill="${j<3?cl3:cl1}" opacity="${(.15+rng()*.35).toFixed(2)}"/>`;
+}
+// Central focal point
+let focus=`<circle cx="${cx}" cy="${cy}" r="2" fill="${cl3}" opacity=".4"/><circle cx="${cx}" cy="${cy}" r="5" fill="none" stroke="${cl1}" stroke-width=".4" opacity=".25"/>`;
+return `<svg class="cfbg" viewBox="0 0 88 144" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+<defs><radialGradient id="cbg_${uid}"><stop offset="0%" stop-color="#1A2050" stop-opacity=".25"/><stop offset="70%" stop-color="#0D1130" stop-opacity="0"/></radialGradient></defs>
+<rect width="88" height="144" fill="url(#cbg_${uid})"/>
+<rect x="2" y="2" width="84" height="140" rx="5" fill="none" stroke="${cl2}" stroke-width=".8" opacity=".25" stroke-dasharray="3 4"/>
+${lines.join('')}${dots}${focus}
+<circle cx="4" cy="4" r="1.5" fill="${cl1}" opacity=".4"/><circle cx="84" cy="4" r="1.5" fill="${cl1}" opacity=".4"/>
+<circle cx="4" cy="140" r="1.5" fill="${cl1}" opacity=".4"/><circle cx="84" cy="140" r="1.5" fill="${cl1}" opacity=".4"/>
+</svg>`;
+}
+function renderPick(s){
+const el=document.getElementById('cardsSpread');if(!el)return;
+el.innerHTML=pCards.map((c,i)=>{
+if(c){let fsvg=cardFaceSVG(c,i);return`<div class="cs"><div class="cw fl pk"><div class="cf cb">${cardBackSVG(i)}<div class="cbn">${i+1}</div></div><div class="cf cfr" style="border-color:${c.c||'var(--star)'}">${fsvg}<div class="cft"><div class="pos" style="color:${c.c||'var(--star)'}">${s.p[i]||''}</div><div class="name" style="color:${c.tc||'var(--star)'}">${c.cn2||c.cn}</div><div class="en" style="color:${c.c||'var(--t3)'}">${c.rev?'▼ ':''}${c.en2||c.en}</div><div class="sym" style="color:${c.c||'var(--star)'}">${c.s||''}</div><div class="kw">${c.rev?'逆：'+c.kw:c.kw}</div><div class="badge" style="background:${(c.c||'var(--star)')+'18'};color:${c.c||'var(--star)'}">${c.arc}阿尔卡纳${c.suit?'·'+c.suit.nm+'组':''}</div></div></div></div><div class="pl">${s.p[i]||''}</div></div>`;}
+return`<div class="cs"><div class="cw" onclick="pick(${i},event)"><div class="cf cb">${cardBackSVG(i)}<div class="cbn">${i+1}</div></div></div><div class="pl">${s.p[i]||''}</div></div>`;
+}).join('');
+}
+
+function pick(i,ev){
+if(pCards[i]!==null)return;
+const c=pool.shift();if(!c)return;
+pCards[i]=c;pOrder.push(i);rem--;
+burst(ev.clientX,ev.clientY,8);
+const s=SPREADS.find(x=>x.id===spread);renderPick(s);
+const prog=document.getElementById('pickProg');if(prog)prog.textContent=rem>0?`还剩 ${rem} 张`:'全部翻开 ✨';
+if(rem===0){
+document.getElementById('result').classList.add('on');
+interpret();
+document.getElementById('shuffleBtn').disabled=false;document.getElementById('shuffleBtn').textContent='✦ 重新洗牌';
+hist.unshift({t:new Date().toLocaleString(),d:domain,s:spread,cs:pCards.map(c=>({n:c.cn2||c.cn,a:c.arc,r:c.rev})),q:qText||'无'});
+if(hist.length>30)hist.pop();renderHist();
+goStep3();
+}
+}
+
+function elmNature(e){
+return e==='火'?{t:'火',desc:'行动·热情·冲动·创造力',adv:'你被火焰驱动——相信直觉，但别让冲动烧了桥。'}
+:e==='水'?{t:'水',desc:'情感·直觉·流动·共情',adv:'水的季节。允许自己感受，但别被情绪的浪花卷走。'}
+:e==='风'?{t:'风',desc:'思想·沟通·理性·变化',adv:'风在脑子里转。落地——把思考变成行动。'}
+:e==='土'?{t:'土',desc:'物质·稳定·耐心·根基',adv:'大地不说话，但它承载一切。稳扎稳打，别怕慢。'}
+:{t:'?',desc:'未知',adv:'保持平衡，灵活应变。'};
+}
+function cardStory(c,i,s){
+let p=s.p[i],cn=c.cn2||c.cn,rev=c.rev,arc=c.arc;
+let lines=[];
+if(arc==='大'){
+lines.push(`「${cn}」出现在「${p}」的位置，这是命运的直接介入。`);
+if(rev)lines.push(`逆位提示：这张大牌的正面力量被阻碍或内化——不是坏事，而是需要你用不同的方式去理解它。`);
+else lines.push(`正位：大阿卡纳以完整姿态降临，它的教义正在你的生命中展开。`);
+}else{
+let wd=elmNature(c.wx);
+lines.push(`「${cn}」落在「${p}」——属于${wd.t}元素的小牌，处理的是你日常中${wd.desc}的层面。`);
+if(rev)lines.push(`逆位：${wd.t}元素在阻力中运行。可能你在这方面的表达受到了压抑，或者你正在以一种不够健康的方式处理它。`);
+else lines.push(`正位：${wd.t}元素的能量顺畅流动。`);
+}
+// merge with the card's own description
+if(c.d){
+if(rev)lines.push(`牌在逆位时对你说：${c.d}`);
+else lines.push(`牌面对你说：${c.d}`);
+}
+return lines.join('<br>');
+}
+
+function domainSynthesis(cards,domain,s){
+let majors=cards.filter(c=>c.arc==='大'),ns=cards.map(c=>c.cn2||c.cn);
+let lines=[];
+if(domain==='love'){
+lines.push('🔮 <b>爱情领域·深层洞察</b>');
+if(majors.some(c=>c.cn==='恋人'))lines.push('恋人牌的出场是核心信号——你在面对一次关键的价值选择。这个选择不只是"选谁"，更是"选自己"。');
+if(majors.some(c=>c.cn==='皇后'))lines.push('皇后在此——情感正在进入一个丰饶的季节。要么你正在被深深滋养，要么你已经准备好了去滋养一段值得的关系。');
+if(majors.some(c=>c.cn==='月亮'))lines.push('月亮投射了阴影——你看到的可能只是投射。在感情里，恐惧和幻想常常穿着同样的衣服。');
+if(majors.some(c=>c.cn==='星星'))lines.push('星星之后是黎明——即使在最暗的夜里，希望从未离开。你被疗愈着。');
+if(majors.some(c=>c.cn==='力量'))lines.push('力量牌在爱情里出现：真正的亲密不是征服，而是温柔的驯服——允许自己脆弱，也允许对方走进来。');
+if(majors.some(c=>c.cn==='节制'))lines.push('节制牌——爱情不需要极端，需要调和。把热烈的滚水和冷静的冰水倒在一起，才是能喝的。');
+if(ns.includes('圣杯2'))lines.push('圣杯二——情感的共鸣正在发生。两杯水互相倾倒，这是最美丽的交流。');
+if(ns.includes('圣杯10'))lines.push('圣杯十——彩虹之下的圆满。情感层面，你正走向一个幸福的高点。');
+}else if(domain==='wealth'){
+lines.push('💰 <b>财运领域·深层洞察</b>');
+if(majors.some(c=>c.cn==='皇帝'))lines.push('皇帝在此——财富需要秩序和掌控。你不是在等待机会，你是在建立王国。');
+if(majors.some(c=>c.cn==='命运之轮'))lines.push('命运之轮——财运有周期。此刻的上下起伏都是暂时的，关键是乘势。');
+if(majors.some(c=>c.cn==='世界'))lines.push('世界牌——一个完整的物质周期即将闭合。收获的季节。');
+if(ns.includes('星币王牌'))lines.push('星币王牌——一扇新的财富之门打开了。但牌也在提醒你：门开了，你得走进去。');
+if(ns.includes('星币9'))lines.push('星币九——独立自足的财富。你靠自己的双手建起的花园，无人能夺走。');
+if(ns.includes('星币10'))lines.push('星币十——传承与繁荣。财富不仅是个人的，更在流向下一环。');
+}else if(domain==='career'){
+lines.push('⚡ <b>事业领域·深层洞察</b>');
+if(majors.some(c=>c.cn==='魔术师'))lines.push('魔术师在此——四大元素齐全，你完全有能力让事业发生质的飞跃。亮出你的技能。');
+if(majors.some(c=>c.cn==='战车'))lines.push('战车——这是加速的时刻。集中注意力，碾过障碍。但别忘了战车需要两只狮身人面兽的平衡。');
+if(majors.some(c=>c.cn==='高塔'))lines.push('高塔——崩塌可能是好事。假的地基建不了高楼。塌了之后你能看到真正的天空。');
+if(ns.includes('权杖8'))lines.push('权杖八——八根权杖飞过天空。事情在加速，抓住这股势头。');
+if(ns.includes('权杖3'))lines.push('权杖三——你的投入正在开花。看见远方的船了吗？那是你的成果正在返航。');
+}else if(domain==='health'){
+lines.push('🌿 <b>健康领域·深层洞察</b>');
+if(majors.some(c=>c.cn==='节制'))lines.push('节制牌——健康的核心是平衡。身体的信号值得被倾听，节奏需要被调回正轨。');
+if(majors.some(c=>c.cn==='力量'))lines.push('力量牌——内在的力量比身体更持久。真正的治愈从温柔的自我对话开始。');
+if(majors.some(c=>c.cn==='星星'))lines.push('星星——疗愈正在进行。给自己时间，给身体信任。');
+}else if(domain==='spirit'){
+lines.push('🌌 <b>灵性领域·深层洞察</b>');
+if(majors.some(c=>c.cn==='女祭司'))lines.push('女祭司坐在帷幕前——你的直觉此刻格外敏锐。答案不在表面，在深处的静默里。');
+if(majors.some(c=>c.cn==='隐士'))lines.push('隐士提灯而来——这是一个向内走的时刻。外面的热闹散尽后，你才会听到自己的声音。');
+if(majors.some(c=>c.cn==='审判'))lines.push('审判的号角吹响——一次灵性的觉醒。你被召唤去成为更完整的自己。');
+}
+if(lines.length===1)lines.push('牌面没有出现特别突出的主题牌，但每张牌都在用自己的方式诉说——请细看逐张解析。');
+return lines.join('<br>');
+}
+
+function interpret(){
+const s=SPREADS.find(x=>x.id===spread),cards=pCards,dn=DOMN[domain];
+let el={};cards.forEach(c=>{el[c.wx]=(el[c.wx]||0)+1;});
+let domEl=Object.entries(el).sort((a,b)=>b[1]-a[1])[0]?.[0]||'?';
+let majors=cards.filter(c=>c.arc==='大').length,minors=cards.filter(c=>c.arc==='小').length;
+let enat=elmNature(domEl);
+
+// Element balance
+let elKeys=['火','水','风','土'],elDetail=elKeys.map(k=>`${k}：${el[k]||0}张`).join(' · ');
+let elBalance='';
+if(elKeys.filter(k=>(el[k]||0)>0).length>=3)elBalance=`元素分布均匀——四个象限都有牌在说话，议题比较全面。`;
+else if(elKeys.filter(k=>(el[k]||0)>=2).length>=2)elBalance=`元素集中在${elKeys.filter(k=>(el[k]||0)>=2).join('和')}，${elKeys.filter(k=>(el[k]||0)===0).length>0?'缺少'+elKeys.filter(k=>(el[k]||0)===0).join('和')+'的声音。':''}`;
+else elBalance=`元素高度集中在${domEl}，${enat.desc}——这是你此刻的核心议题。`;
+
+// Per card detail
+let cis=cards.map((c,i)=>({
+n:c.rev?`${c.cn2||c.cn} ▼`:`${c.cn2||c.cn}`,
+p:s.p[i],
+d:c.rev?'逆：'+c.d:c.d,
+w:c.wx,cl:c.c,arc:c.arc,
+story:cardStory(c,i,s)
+}));
+
+// Patterns
+let ns=cards.map(c=>c.cn2||c.cn);
+let pat=[];
+pat.push(`<b>牌阵格局</b>：${s.name}，${s.n}张牌。${majors}张大阿卡纳 + ${minors}张小阿卡纳。`);
+pat.push(`<b>主导元素</b>：${domEl}（${enat.desc}）`);
+pat.push(`<b>元素分布</b>：${elDetail}`);
+pat.push(elBalance);
+if(majors>=s.n*.5)pat.push(`<b>⚠ 命运信号</b>：大牌占比${Math.round(majors/s.n*100)}%——命运在直接跟你说话。这不是日常小事，这是人生篇章的转向。`);
+if(majors===0)pat.push(`<b>日常旋律</b>：全小牌，没有大阿卡纳介入。命运没来敲门——但日常中的每一个选择都在悄悄塑造你的未来。把眼前的事一件一件做好。`);
+if(useRev&&cards.filter(c=>c.rev).length>=s.n*.4)pat.push(`<b>逆位密集</b>：${cards.filter(c=>c.rev).length}张逆位牌——能量受阻或被内化。不是坏事，而是提醒：需要换个角度处理这些议题。`);
+
+// Special combos
+if(ns.includes('高塔')&&ns.includes('星星'))pat.push('<b>🌟 高塔 × 星星</b>：崩塌与希望同时在场。旧的必须倒，新的已经开始发光。疼痛是清理的过程。');
+if(ns.includes('死神'))pat.push('<b>💀 死神在场</b>：一次必然的终结。不腾空，种不了新的。允许旧的东西腐烂——它在为新的你腾地方。');
+if(ns.includes('恶魔')&&ns.includes('恋人'))pat.push('<b>⛓ 恶魔 × 恋人</b>：你在上瘾和选择之间搏斗。锁链是松的——你知道你可以走，但还没走。问自己：这真的是爱，还是一种习惯性的捆绑？');
+if(ns.includes('月亮')&&ns.includes('太阳'))pat.push('<b>🌙→☀ 月亮到太阳</b>：迷雾是暂时的。真相正在升起，只需要一点耐心。');
+if(ns.includes('命运之轮'))pat.push('<b>☸ 命运之轮</b>：轮子在转。"上面"和"下面"都不重要——它总会再转。关键是你乘上哪一波。');
+if(ns.includes('世界'))pat.push('<b>⊕ 世界</b>：一个完整的周期即将闭合。你走过的每一步都是圆的——出发时的你，和此刻的你，已经不同。');
+
+// Narrative
+let nArr=cards.map((c,i)=>{
+let cn=c.cn2||c.cn,rev=c.rev;
+let mood=rev?'（能量内转）':'';
+return `「${s.p[i]}」→ ${cn}${mood}：${c.d||c.kw||''}`;
+}).join('\n');
+let closing=(()=>{
+if(majors>=4)return '大牌密集——命运正在用力地写你的下一章。请仔细读每张牌，它们不是随机的。';
+if(majors>=2)return `${majors}张大牌在阵中。命运在轻拍你的肩膀——注意这些信号。`;
+if(majors===0)return '命运没来，但你来了。日常的每一张牌都在说：把手头的事做好，那就是你此刻的修炼。';
+return '牌阵已完整展开。每张牌都是一个视角——合起来，就是你现在需要看到的画面。';
+})()+'\n—— 翻开你自己的命运吧，TY。';
+
+// Domain-specific advice
+let adv=[`<b>${enat.t}元素主导建议</b>：${enat.adv}`];
+if(domain==='love'){
+let la=[];
+if(ns.includes('恋人'))la.push('做价值选择，而不是用"合适"当借口逃避。');
+if(ns.includes('恶魔'))la.push('诚实地区分：这是爱，还是一种习惯性的依赖？锁链是松的——你随时可以走。');
+if(ns.includes('星星'))la.push('疗愈正在进行。给伤口时间呼吸，星星已经亮了。');
+if(ns.includes('圣杯2'))la.push('情感的共鸣很美——保持这种双向的流动。');
+if(ns.includes('圣杯4'))la.push('拥有的不想要，想要的没看到——先停下来看看自己手里有什么。');
+if(ns.includes('圣杯5'))la.push('三杯倒了——但你身后还有两杯立着。看到失去的，也看到还在的。');
+if(ns.includes('圣杯8'))la.push('有些东西，再多也不够。如果离开是答案，那就走——身后有水在等你。');
+if(la.length)adv.push('<b>💕 爱情专项建议</b>：'+la.join('；'));
+}else if(domain==='wealth'){
+let wa=[];
+if(ns.includes('星币4'))wa.push('守财是本能，但钱是拿来用的——找到流动的出口。');
+if(ns.includes('星币王牌'))wa.push('新的财富机会出现了——但你要伸手去拿。');
+if(ns.includes('星币9'))wa.push('自给自足是最大的底气——你靠自己的手建的，无人能夺。');
+if(ns.includes('星币6'))wa.push('给予的能力才是真正的富足——你的慷慨会以你意想不到的方式回流。');
+if(wa.length)adv.push('<b>💰 财运专项建议</b>：'+wa.join('；'));
+}else if(domain==='career'){
+let ca=[];
+if(ns.includes('魔术师'))ca.push('四大元素皆在——亮出你的技能，让世界看到。');
+if(ns.includes('战车'))ca.push('加速期——先动起来，完美的计划不如第一步。');
+if(ns.includes('隐士'))ca.push('退一步不是失败。独处和内省有时比冲刺更重要。');
+if(ns.includes('权杖3'))ca.push('你的投入在回来的路上了——保持耐心和信心。');
+if(ns.includes('权杖8'))ca.push('八根权杖飞过——事情正在高速运转，顺势而为。');
+if(ca.length)adv.push('<b>⚡ 事业专项建议</b>：'+ca.join('；'));
+}
+adv.push(`<b>⚖ 平衡提醒</b>：${enat.t==='火'?'想清楚再点火，冲动可能烧桥':enat.t==='水'?'先感受再行动，但别被情绪淹没':enat.t==='风'?'别过度分析——脑袋里的风暴不等于行动':enat.t==='土'?'稳定是好，但偶尔需要冒险的理由':'保持灵活，随机应变'}。`);
+
+// Soul whisper
+let whispers={
+'愚者':'你总在担心下一步——其实你需要的只是一跃。',
+'魔术师':'力量在你手里，比你以为的多得多。',
+'女祭司':'安静下来。答案不在外面。',
+'皇后':'给自己被滋养的权利。你值得。',
+'皇帝':'秩序是你建的，规则由你定。',
+'恋人':'选择本身就是一种成为。',
+'战车':'加速吧——但记得两只脚一起踩。',
+'力量':'温柔比强硬更强大。',
+'隐士':'独处不是逃避，是最深的相遇。',
+'命运之轮':'接受起伏——轮子总会再转的。',
+'正义':'因果从不骗人。你放心。',
+'倒吊人':'换一个角度看——你可能会笑出来。',
+'死神':'该放的让它死。新的才能活。',
+'节制':'温度刚好——别再加火了。',
+'恶魔':'锁链是松的。你一直可以走。',
+'高塔':'塌了才能看到天空。不怕。',
+'星星':'已经在愈合了。你感觉到了吗？',
+'月亮':'现在看到的不是全貌。先别急。',
+'太阳':'一切明朗——你终于在自己中心了。',
+'审判':'号角在吹——你听见的，是你最深处的声音。',
+'世界':'一圈走完。你和出发时不一样了。'
+};
+let soul='';
+cards.forEach(c=>{
+let k=c.cn2||c.cn;
+if(whispers[k])soul+=whispers[k]+' ';
+});
+if(!soul)soul='每一张牌都是你此刻需要的一面镜子。';
+
+document.getElementById('ip').innerHTML=`
+<div class="iph"><h3>${dn} · ${s.name} · 解读</h3></div>
+<div class="ipb">
+<div class="narr">${nArr.replace(/\n/g,'<br>')}</div>
+<div class="sec"><h4>🔍 牌阵全景</h4>
+${pat.map(p=>`<div class="obox"><p>${p}</p></div>`).join('')}
+</div>
+<div class="sec"><h4>${dn==='爱情'?'💕':dn==='事业'?'⚡':dn==='财运'?'💰':dn==='健康'?'🌿':dn==='灵性'?'🌌':'🌙'} ${dn}深度解读</h4>
+<div class="obox" style="line-height:1.9">${domainSynthesis(cards,domain,s)}</div>
+</div>
+<div class="sec"><h4>📜 逐张解析</h4><div class="clist">${cis.map(ci=>`<div class="ci"><div class="ct"><span class="cnn" style="color:${ci.cl}">${ci.n} ${ci.arc==='大'?'★':''}</span><span class="cpos">${ci.p}</span></div><div class="cd" style="line-height:1.9">${ci.story}</div></div>`).join('')}</div></div>
+<div class="sec"><h4>🎯 行动建议</h4><div class="abox" style="line-height:1.9">${adv.map(a=>`<p>${a}</p>`).join('')}</div></div>
+<div class="sec"><h4>🌌 灵魂低语</h4><div class="narr" style="font-style:italic;line-height:2">${soul.trim()}</div></div>
+</div>`;
+}
+
+function renderHist(){document.getElementById('histGrid').innerHTML=hist.slice(0,20).map((h,i)=>`<div class="hi" onclick="loadHist(${i})"><div class="hd">${h.cs.map(c=>c.a==='大'?'★':'·').join('')}</div><div class="ht">${h.t.split(' ')[1]||h.t}</div></div>`).join('');}
+function loadHist(i){let h=hist[i];domain=h.d;spread=h.s;domTags();spreadBtns();document.getElementById('q').value=h.q==='无'?'':h.q;pCards=h.cs.map(cd=>{let o=DECK.find(d=>(d.cn2||d.cn)===cd.n&&d.arc===cd.a);if(!o)o=DECK.find(d=>(d.cn2||d.cn)===cd.n);let c={...o};if(cd.r)c.rev=true;return c;});const s=SPREADS.find(x=>x.id===spread);interpret();goStep3();}
+
+// === STEP NAVIGATION ===
+let curStep=1,qaHistory=[];
+function showPanel(n){
+['step1','step2','step3','step4'].forEach((id,i)=>{
+document.getElementById(id).classList.toggle('on',i+1===n);
+});
+curStep=n;
+}
+function updateDots(n){
+['sdot1','sdot2','sdot3','sdot4'].forEach((id,i)=>{
+const el=document.getElementById(id);
+el.classList.remove('act','done');
+if(i+1===n)el.classList.add('act');
+else if(i+1<n)el.classList.add('done');
+});
+['sline1','sline2','sline3'].forEach((id,i)=>{
+document.getElementById(id).classList.toggle('done',i+1<n);
+});
+}
+function goStep1(){
+showPanel(1);updateDots(1);
+document.getElementById('pickArea').innerHTML='';
+document.getElementById('pickArea').classList.remove('on');
+document.getElementById('result').classList.remove('on');
+document.getElementById('shuffleBtn').disabled=false;
+document.getElementById('shuffleBtn').textContent='✦ 洗牌 · 摊开牌面';
+pCards=[];pOrder=[];rem=0;pool=[];qaHistory=[];
+document.querySelector('.petals').classList.remove('on');
+domTags();spreadBtns();
+}
+function goStep2(){
+const s=SPREADS.find(x=>x.id===spread);
+if(!s)return;
+showPanel(2);updateDots(2);
+document.getElementById('pickArea').innerHTML='';
+document.getElementById('pickArea').classList.remove('on');
+document.getElementById('result').classList.remove('on');
+document.getElementById('shuffleBtn').disabled=false;
+document.getElementById('shuffleBtn').textContent='✦ 洗牌 · 摊开牌面';
+pCards=[];pOrder=[];rem=0;pool=[];qaHistory=[];
+document.querySelector('.petals').classList.remove('on');
+}
+function goStep3(){
+showPanel(3);updateDots(3);
+document.querySelector('.petals').classList.add('on');
+}
+function goStep4(){
+showPanel(4);updateDots(4);
+document.querySelector('.petals').classList.add('on');
+if(pCards.length>0){
+const s=SPREADS.find(x=>x.id===spread);
+document.getElementById('qaMiniCards').innerHTML=pCards.filter(c=>c).map(c=>{
+let cn=c.cn2||c.cn;
+return `<span class="qa-mc" style="color:${c.c||'var(--star)'}">${c.rev?'▼ ':''}${cn}</span>`;
+}).join('');
+// Reset Q&A
+qaHistory=[];
+document.getElementById('qaList').innerHTML='<div class="qa-empty">💬 每张牌都在等你提问——<br>比如"为什么会出现这张牌？""这几张牌之间有什么联系？""我应该怎么做？"</div>';
+document.getElementById('qaInput').value='';
+}
+}
+
+// === DEEP Q&A ENGINE ===
+function askQA(){
+const q=document.getElementById('qaInput').value.trim();
+if(!q||pCards.length===0)return;
+document.getElementById('qaInput').value='';
+const s=SPREADS.find(x=>x.id===spread);
+const dn=DOMN[domain];
+const cards=pCards;
+
+// Build answer
+let answer=deepAnalyze(q,cards,s,dn);
+
+// Render Q&A
+qaHistory.push({q,a:answer});
+let html='';
+qaHistory.forEach(h=>{
+html+=`<div class="qa-q">${h.q}</div><div class="qa-a">${h.a}</div>`;
+});
+document.getElementById('qaList').innerHTML=html;
+document.getElementById('qaList').scrollTop=document.getElementById('qaList').scrollHeight;
+}
+
+function deepAnalyze(q,cards,s,dn){
+let ql=q.toLowerCase();
+let lines=[];
+
+// Check question intent
+let isWhy=ql.includes('为什么')||ql.includes('原因')||ql.includes('怎么会');
+let isHow=ql.includes('怎么')||ql.includes('如何')||ql.includes('应该')||ql.includes('怎么办');
+let isWhat=ql.includes('什么')||ql.includes('意思')||ql.includes('含义');
+let isLink=ql.includes('联系')||ql.includes('关系')||ql.includes('之间');
+let isFuture=ql.includes('未来')||ql.includes('结果')||ql.includes('走向');
+let isMe=ql.includes('我')||ql.includes('自己');
+let isCard=ql.includes('牌')||ql.includes('这张');
+
+// Find relevant cards
+let qKWs=[];
+['恋人','爱情','感情','分手','复合','桃花'].forEach(w=>{if(ql.includes(w))qKWs.push('love');});
+['工作','事业','职场','创业','晋升','跳槽'].forEach(w=>{if(ql.includes(w))qKWs.push('career');});
+['钱','财','富','收入','投资','理财'].forEach(w=>{if(ql.includes(w))qKWs.push('wealth');});
+['健康','身体','病','累','失眠','压力'].forEach(w=>{if(ql.includes(w))qKWs.push('health');});
+['命运','灵性','前世','灵魂','使命'].forEach(w=>{if(ql.includes(w))qKWs.push('spirit');});
+
+// Score each card's relevance to the question
+let scored=cards.map((c,i)=>{
+let score=0;
+let cn=c.cn2||c.cn,en=c.en2||c.en,kw=c.kw||'',d=c.d||'';
+// Keyword match
+if(ql.includes(cn)||(en&&ql.toLowerCase().includes(en.toLowerCase())))score+=10;
+qKWs.forEach(k=>{
+if(k==='love'&&['圣杯','恋人','皇后','星星'].some(w=>cn.includes(w)))score+=5;
+if(k==='career'&&['权杖','魔术师','战车','皇帝'].some(w=>cn.includes(w)))score+=5;
+if(k==='wealth'&&['星币','皇帝','世界'].some(w=>cn.includes(w)))score+=5;
+if(k==='health'&&['节制','力量','星星','月亮'].some(w=>cn.includes(w)))score+=5;
+if(k==='spirit'&&['女祭司','隐士','审判','月亮','星星'].some(w=>cn.includes(w)))score+=5;
+});
+// Position relevance
+if(isWhy&&i<3)score+=3;
+if(isFuture&&i>=s.n-2)score+=3;
+// Major arcana boost
+if(c.arc==='大')score+=2;
+if(c.rev)score+=1;
+
+return {...c,idx:i,score};
+}).sort((a,b)=>b.score-a.score);
+
+// Build narrative
+let top3=scored.filter(x=>x.score>0).slice(0,3);
+if(top3.length===0)top3=scored.slice(0,3);
+
+// Intro
+if(isCard){
+lines.push(`<b>关于这张牌</b><br><br>你问了牌面本身。让我从你在「${s.name}」阵中翻开的牌里深度挖掘：`);
+}else if(isWhy){
+lines.push(`<b>为什么会是这样？</b><br><br>你问"为什么"——这是最有力量的问题。每一张牌的出现都有它的原因。从你在「${s.name}」阵中翻开的<span style="color:var(--star)">${cards.length}</span>张牌里，我拆给你看：`);
+}else if(isHow){
+lines.push(`<b>怎么走下一步？</b><br><br>牌不是告诉你命运——是告诉你手里有什么牌，然后你自己打。从你的「${s.name}」来看：`);
+}else if(isLink){
+lines.push(`<b>牌与牌之间的联系</b><br><br>这${cards.length}张牌不是孤立的——它们之间在对话。我帮你串起来：`);
+}else if(isFuture){
+lines.push(`<b>未来的走向</b><br><br>牌阵的最后几张是时间线上的箭头。基于你现在翻开的牌：`);
+}else{
+lines.push(`<b>关于你的问题</b><br><br>基于你在「${s.name}」阵中翻开的${cards.length}张牌，我做一个精准的切入：`);
+}
+
+lines.push('');
+
+// Analyze top relevant cards
+top3.forEach((c,i)=>{
+let cn=c.cn2||c.cn,pos=s.p[c.idx]||'',rev=c.rev,arc=c.arc;
+let prefix=i===0?'🔮':i===1?'📜':'✨';
+lines.push(`${prefix} <b style="color:${c.c||'var(--star)'}">「${cn}」${rev?'▼':''}</b> — 落在「${pos}」的位置`);
+lines.push(`位置含义：${pos}${rev?'（逆位：能量内转或受阻）':'（正位：能量顺畅表达）'}`);
+lines.push(`牌在告诉你：${rev?'逆位提示——'+c.d:c.d}`);
+if(arc==='大')lines.push(`这是大阿卡纳——命运级的信号。别忽略。`);
+else{
+let wd=elmNature(c.wx);
+lines.push(`属于${wd.t}元素——处理的是日常中${wd.desc}的层面。`);
+}
+lines.push('');
+});
+
+// Element interplay
+let el={};
+cards.forEach(c=>{el[c.wx]=(el[c.wx]||0)+1;});
+let domEl=Object.entries(el).sort((a,b)=>b[1]-a[1])[0]?.[0]||'?';
+let enat=elmNature(domEl);
+lines.push(`<b>元素视角</b><br>牌阵主导元素是${domEl}（${enat.desc}）。${enat.adv}`);
+
+// Synthesis answer
+lines.push('');
+if(isWhy){
+lines.push(`<b>所以，为什么会是这样？</b><br>${top3[0]?(top3[0].cn2||top3[0].cn):'牌面'}的出现不是偶然。它在「${top3[0]?cards[top3[0].idx]?s.p[top3[0].idx]:'':''}」的位置，意味着${top3[0]?cards[top3[0].idx]?(cards[top3[0].idx].rev?'你需要向内看——答案不在外面，在被你忽略的深处。':'这件事的发生有它的必然性。牌在说：注意这个信号，它在帮你校准方向。'):'':''}`);
+}else if(isHow){
+lines.push(`<b>行动的精髓</b><br>${isMe?`牌阵在对你说话——不是对别人。${enat.adv}。具体到你的问题：第一步，看着「${top3[0]?(top3[0].cn2||top3[0].cn):'牌面'}」给的方向；第二步，信任${cards.some(c=>c.arc==='大')?'大牌的力度':'你日常的直觉'}。`:'牌不说话，牌只照亮。下一步已经在光里了——你需要的是迈出去。'}`);
+}else if(isLink){
+let conns=[];
+for(let i=0;i<Math.min(3,top3.length-1);i++){
+conns.push(`「${top3[i].cn2||top3[i].cn}」→「${top3[i+1].cn2||top3[i+1].cn}」：${top3[i].wx===top3[i+1].wx?'同一元素流动，能量在递进':'元素转换——从'+top3[i].wx+'到'+top3[i+1].wx+'，议题在升级'}`);
+}
+lines.push(`<b>牌的对话</b><br>${conns.join('<br>')}`);
+}else{
+lines.push(`<b>TA想对你说的</b><br>${cards.filter(c=>c.arc==='大').length>0?'命运在写你的下一章。':''} 这几张牌合在一起说的是：<span style="color:var(--star)">${top3.map(c=>c.cn2||c.cn).join(' → ')}</span>。这就是你此刻需要的答案。`);
+}
+
+lines.push('');
+lines.push(`<span style="font-size:11px;color:var(--t3)">—— 基于「${s.name}」·${dn}领域 · ${cards.length}张牌的精准解读</span>`);
+
+return lines.join('<br>');
+}
+
+</script>
+<script>
+// ============ ORGANIC SWIRL GENERATOR ============
+function genSwirlHTML(cx,cy,maxR,turns,arms,strips,colors){
+let paths=[];
+for(let arm=0;arm<arms;arm++){
+let baseAngle=(arm/arms)*Math.PI*2;
+for(let s=0;s<strips;s++){
+let t=s/strips;
+let r=maxR*(.15+t*.85);
+let angle=baseAngle+t*turns*Math.PI*2;
+// Add organic wobble
+let wo=r*.06*(Math.sin(t*20+arm*3)+Math.cos(t*17+arm*5))*.5;
+let wa=angle+(Math.sin(t*14+arm*7)+Math.cos(t*11+arm*3))*15*Math.PI/180;
+let rr=r+wo;
+// Stroke length
+let dl=r*.15*(.7+Math.random()*.6);
+let da=.15+Math.random()*.3;
+let a1=wa,x1=cx+Math.cos(a1)*rr,y1=cy-Math.sin(a1)*rr;
+let a2=wa+da,x2=cx+Math.cos(a2)*(rr+dl*.3),y2=cy-Math.sin(a2)*(rr+dl*.3);
+let ax=cx+Math.cos(wa+da*.5)*(rr+dl*.1),ay=cy-Math.sin(wa+da*.5)*(rr+dl*.1);
+let w=.8+Math.random()*2.5;
+let op=.4+Math.random()*.5;
+let clr=colors[Math.floor(Math.random()*colors.length)];
+paths.push(`<path d="M${x1.toFixed(1)},${y1.toFixed(1)} Q${ax.toFixed(1)},${ay.toFixed(1)} ${x2.toFixed(1)},${y2.toFixed(1)}" fill="none" stroke="${clr}" stroke-width="${w.toFixed(1)}" stroke-linecap="round" opacity="${op.toFixed(2)}"/>`);
+}
+}
+return paths.join('\n');
+}
+
+// Inject organic swirls
+(function(){
+// Van Gogh palette: deep navy, cyan, teal, cream, pale blue-green, bright sky, dark indigo
+const C1=['#1A237E','#283593','#3949AB','#5C6BC0','#29B6F6','#4FC3F7','#81D4FA','#00ACC1','#26C6DA','#B3E5FC','#E3F2FD','#7986CB','#3F51B5'];
+const C2=['#1565C0','#1976D2','#42A5F5','#64B5F6','#0277BD','#0288D1','#039BE5','#4FC3F7','#26C6DA','#BBDEFB'];
+const C3=['#1A237E','#283593','#3949AB','#5C6BC0','#29B6F6','#4FC3F7','#81D4FA','#00ACC1'];
+const C4=['#1565C0','#1976D2','#42A5F5','#039BE5','#29B6F6','#81D4FA','#E3F2FD','#26C6DA','#B3E5FC'];
+let sw0=document.querySelector('.sw0');if(sw0)sw0.innerHTML=genSwirlHTML(380,180,120,3.5,6,60,C1);
+let sw1=document.querySelector('.sw1');if(sw1)sw1.innerHTML=genSwirlHTML(640,120,80,3,5,40,C2);
+let sw2=document.querySelector('.sw2');if(sw2)sw2.innerHTML=genSwirlHTML(190,330,65,2.5,4,30,C3);
+let sw3=document.querySelector('.sw3');if(sw3)sw3.innerHTML=genSwirlHTML(710,370,55,2.2,4,28,C4);
+let sw4=document.querySelector('.sw4');if(sw4)sw4.innerHTML=genSwirlHTML(290,210,45,2.5,3,25,C2)+genSwirlHTML(530,280,40,2,3,22,C3);
+})();
+domTags();spreadBtns();
+showPanel(1);updateDots(1);
+document.getElementById('shuffleBtn').addEventListener('click',startPick);
+</script>
+</body>
+</html>
